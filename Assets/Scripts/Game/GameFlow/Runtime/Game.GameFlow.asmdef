@@ -1,0 +1,8 @@
+{
+	"name": "Game.GameFlow",
+	"references": [
+		"Game.Gameplay",
+		"Game.Input",
+		"Game.Presentation"
+	]
+}

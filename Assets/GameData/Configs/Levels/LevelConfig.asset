@@ -1,0 +1,22 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 27e696e2db097403caa870205d30467c, type: 3}
+  m_Name: LevelConfig
+  m_EditorClassIdentifier: 
+  _playerConfig: {fileID: 11400000, guid: 1d89da805f4034f47ad81ab347bdf029, type: 2}
+  _enemies:
+  - _config: {fileID: 11400000, guid: f4325e9eba05e4f5ca77fd3e148a9aa3, type: 2}
+    _count: 6
+  _food:
+    _prefab: {fileID: 5820256450415405210, guid: a02eb90e0bd1a46dfaa8262e3dc249e4, type: 3}
+    _count: 50
+  _playerWinSize: 20
