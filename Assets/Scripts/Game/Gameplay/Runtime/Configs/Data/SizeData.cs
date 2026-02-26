@@ -6,7 +6,7 @@ namespace Game.Gameplay
     [Serializable]
     public class SizeData
     {
-        [SerializeField, Range(1, 1)] private int _minSize;
+        [SerializeField, Min(1)] private int _minSize;
         [SerializeField, Min(1)] private int _maxSize;
         
         [SerializeField, Min(0.1f)]private float _delayInDecrease;

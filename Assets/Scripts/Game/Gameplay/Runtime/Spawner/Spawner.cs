@@ -72,12 +72,12 @@ namespace Game.Gameplay
         private T Create()
         {
             T spawnable = Instantiate(_prefab);
-            AdditionalCreationSettings(spawnable);
+            AdditionalCreationSettings(spawnable, _playField);
 
             return spawnable;
         }
         
-        protected virtual void AdditionalCreationSettings(T spawnable) { }
+        protected virtual void AdditionalCreationSettings(T spawnable, PlayField playField) { }
 
         private void ActOnGet(T spawnable)
         {

@@ -9,7 +9,9 @@ namespace Game.Gameplay
         
         private Enemy _self;
         private EnemySpaceScanner _spaceScanner;
+        private BoundarySteering _boundarySteering;
         private IAbsorbable _mainTarget;
+        private PlayField _playField;
         
         private float _dangerRadius;
         private float _absorbRadius;
@@ -19,6 +21,7 @@ namespace Game.Gameplay
         private float _threatWeightMin;
         private float _threatWeightMax;
         private float _wanderWeight;
+        private float _boundaryWeight;
         
         private float _minBoost;
         private float _mainTargetHuntBias;
@@ -36,7 +39,7 @@ namespace Game.Gameplay
         
         private float _nextWanderTime;
         
-        public void Construct(ITargetable mainTarget, EnemyBrainData brainData)
+        public void Construct(CapsuleCollider2D collider, EnemyBrainData brainData, ITargetable mainTarget, PlayField playField)
         {
             _mainTarget = (IAbsorbable)mainTarget;
             
@@ -50,6 +53,7 @@ namespace Game.Gameplay
             _threatWeightMin = brainData.ThreatWeightMin; 
             _threatWeightMax = brainData.ThreatWeightMax;
             _wanderWeight = brainData.WanderWeight;
+            _boundaryWeight = brainData.BoundaryWeight;
         
             _minBoost = brainData.MinBoost;
             _mainTargetHuntBias = brainData.MainTargetHuntBias;
@@ -59,8 +63,13 @@ namespace Game.Gameplay
             _minDelayWanderChange = brainData.MinDelayWanderChange;
             _maxDelayWanderChange = brainData.MaxDelayWanderChange;
 
-            _epsilon = brainData.Epsilon;
+            _epsilon = brainData.SqrDistanceEpsilon;
             _directionChangeRate = brainData.DirectionChangeRate;
+            
+            _playField = playField;
+
+            _boundarySteering = new BoundarySteering(collider, _playField, brainData.BoundaryAvoidDistance,
+                brainData.BoundaryDistanceEpsilon, brainData.BoundaryThreshold);
         }
 
         private void Awake()
@@ -78,18 +87,24 @@ namespace Game.Gameplay
             Vector2 threatForce = ComputeThreatRepulsion(selfPosition, selfSize, out panic);
             Vector2 absorbableForce = ComputeAbsorbablesAttraction(selfPosition);
             Vector2 preyForce = ComputePreyAttraction(selfPosition, selfSize);
+            Vector2 boundaryForce = _boundarySteering.ComputeBoundaryRepulsion(selfPosition);
 
             float threatWeight = Mathf.Lerp(_threatWeightMin, _threatWeightMax, panic * panic);
 
             Vector2 desired =
                 threatForce * threatWeight +
                 absorbableForce * _absorbableWeight +
-                preyForce * _preyWeight;
+                preyForce * _preyWeight +
+                boundaryForce * _boundaryWeight;
 
             if (desired.sqrMagnitude < MinSqrMagnitudeForDirection)
                 desired = ComputeWander() * _wanderWeight;
 
             Vector2 desiredDirection = Vector2.ClampMagnitude(desired, 1f);
+            
+            Vector2 escapeDirection = GetEscapeDirection(threatForce, desiredDirection);
+            
+            desiredDirection = _boundarySteering.ResolveDirection(desiredDirection, selfPosition, escapeDirection);
             
             _smoothedDirection = Vector2.Lerp(_smoothedDirection, desiredDirection, _directionChangeRate * Time.deltaTime);
             
@@ -198,6 +213,17 @@ namespace Game.Gameplay
                 _wanderDirection = Random.insideUnitCircle.normalized;
             }
             return _wanderDirection;
+        }
+        
+        private Vector2 GetEscapeDirection(Vector2 threatForce, Vector2 desiredDirection)
+        {
+            if (threatForce.sqrMagnitude > MinSqrMagnitudeForDirection)
+                return threatForce.normalized;
+
+            if (desiredDirection.sqrMagnitude > MinSqrMagnitudeForDirection)
+                return desiredDirection.normalized;
+
+            return Vector2.right;
         }
     }
 }

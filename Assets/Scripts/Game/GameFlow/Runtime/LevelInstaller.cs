@@ -17,8 +17,8 @@ namespace Game.GameFlow
         public LevelController BuildLevel()
         {
             Player player = Instantiate(_config.PlayerConfig.Prefab);
-            player.Construct(_config.PlayerConfig);
-            _cameraMovement.Construct(player);
+            player.Construct(_config.PlayerConfig, _playField);
+            _cameraMovement.Construct(player, _playField);
 
             Dictionary<EnemyConfig, EnemySpawner> enemySpawners = ConstructEnemySpawners(player);
 

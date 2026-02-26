@@ -13,12 +13,15 @@ namespace Game.Gameplay
             _player = player;
         }
 
-        protected override void AdditionalCreationSettings(Enemy enemy)
+        protected override void AdditionalCreationSettings(Enemy enemy, PlayField playField)
         {
-            enemy.Construct(_config);
+            enemy.Construct(_config, playField);
 
-            if (enemy.TryGetComponent(out EnemyBrain enemyBrain))
-                enemyBrain.Construct(_player, _config.BrainData);
+            if (enemy.TryGetComponent(out CapsuleCollider2D collider))
+            {
+                if (enemy.TryGetComponent(out EnemyBrain enemyBrain))
+                    enemyBrain.Construct(collider, _config.BrainData, _player, playField);
+            }
         }
     }
 }

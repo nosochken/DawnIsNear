@@ -22,20 +22,21 @@ namespace Game.Gameplay
         public bool IsActive => isActiveAndEnabled;
         public Vector2 CurrentPosition => transform.position;
         
-        public void Construct(EntityConfigs config)
+        public void Construct(EntityConfigs config, PlayField playField)
         {
             MinSize = config.Size.MinSize;
             //_maxSize = config.Size.MaxSize;
             Size = config.Size.MinSize;
+            SizeChanged?.Invoke(Size);
             
             _absorbOverTimeInterval = config.Size.DelayInDecrease;
             
-            ExtendConstructor(config);
+            ExtendConstructor(config, playField);
             
             _beAbsorbedCoroutine = StartCoroutine(BeAbsorbedOverTime());
         }
-        
-        protected virtual void ExtendConstructor(EntityConfigs config) { }
+
+        protected abstract void ExtendConstructor(EntityConfigs config, PlayField playField);
 
         private void Awake()
         {

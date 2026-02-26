@@ -3,17 +3,17 @@ using Game.Input;
 
 namespace Game.Gameplay
 {
-    [RequireComponent(typeof(PlayerInputController), typeof(ScreenToWorld), typeof(Movement))]
+    [RequireComponent(typeof(PlayerInputController), typeof(ScreenToWorld), typeof(PlayerMovement))]
 
     public class Player : Absorber
     {
         private PlayerInputController _input;
         private ScreenToWorld _screenToWorld;
-        private Movement _movement;
+        private PlayerMovement _movement;
     
-        protected override void ExtendConstructor(EntityConfigs config)
+        protected override void ExtendConstructor(EntityConfigs config, PlayField playField)
         {
-            _movement.Construct(config.Movement, Size);
+            _movement.Construct(config.Movement, Size, playField);
         }
         
         protected override void GetComponents()
@@ -22,7 +22,7 @@ namespace Game.Gameplay
         
             _input = GetComponent<PlayerInputController>();
             _screenToWorld = GetComponent<ScreenToWorld>();
-            _movement = GetComponent<Movement>();
+            _movement = GetComponent<PlayerMovement>();
         }
 
         private void FixedUpdate()

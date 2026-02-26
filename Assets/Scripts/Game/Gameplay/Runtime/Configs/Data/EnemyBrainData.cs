@@ -1,5 +1,6 @@
 using System;
 using UnityEngine;
+using UnityEngine.Serialization;
 
 namespace Game.Gameplay
 {
@@ -23,8 +24,14 @@ namespace Game.Gameplay
         [SerializeField, Min(0f)] private float _minDelayWanderChange;
         [SerializeField, Min(0f)] private float _maxDelayWanderChange;
 
-        [SerializeField, Min(0f)] private float _epsilon;
+        [SerializeField, Min(0f)] private float _sqrDistanceEpsilon;
         [SerializeField, Min(0f)] private float _directionChangeRate;
+        
+        //MovementBoundary
+        [SerializeField, Min(0f)] private float _boundaryWeight;
+        [SerializeField, Min(0f)] private float _BoundaryAvoidDistance;
+        [SerializeField, Min(0f)] private float _boundaryThreshold;
+        [SerializeField, Min(0f)] private float _boundaryDistanceEpsilon;
         
         public float DangerRadius => _dangerRadius;
         public float AbsorbRadius => _absorbRadius;
@@ -43,7 +50,13 @@ namespace Game.Gameplay
         public float MinDelayWanderChange => _minDelayWanderChange;
         public float MaxDelayWanderChange => _maxDelayWanderChange;
 
-        public float Epsilon => _epsilon;
+        public float SqrDistanceEpsilon => _sqrDistanceEpsilon;
         public float DirectionChangeRate => _directionChangeRate;
+        
+        //MovementBoundary
+        public float BoundaryWeight => _boundaryWeight;
+        public float BoundaryAvoidDistance => _BoundaryAvoidDistance;
+        public float BoundaryThreshold => _boundaryThreshold;
+        public float BoundaryDistanceEpsilon => _boundaryDistanceEpsilon;
     }
 }

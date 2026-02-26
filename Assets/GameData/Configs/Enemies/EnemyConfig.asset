@@ -38,5 +38,9 @@ MonoBehaviour:
     _maxPreyAttractionBoost: 1.8
     _minDelayWanderChange: 0.6
     _maxDelayWanderChange: 1.2
-    _epsilon: 0.25
+    _sqrDistanceEpsilon: 0.25
     _directionChangeRate: 10
+    _boundaryWeight: 1.5
+    _BoundaryAvoidDistance: 1.2
+    _boundaryThreshold: 0.05
+    _boundaryDistanceEpsilon: 0.02

@@ -3,24 +3,24 @@ using UnityEngine;
 
 namespace Game.Gameplay
 {
-    [RequireComponent(typeof(Movement))]
+    [RequireComponent(typeof(EnemyMovement))]
     public class Enemy : Absorber, ISpawnable<Enemy>
     {
-        private Movement _movement;
+        private EnemyMovement _movement;
         
         private Vector2 _targetDirection;
         
         public event Action<Enemy> ReadyToSpawn;
         
-        protected override void ExtendConstructor(EntityConfigs config)
+        protected override void ExtendConstructor(EntityConfigs config, PlayField playField)
         {
-            _movement.Construct(config.Movement, Size);
+            _movement.Construct(config.Movement, Size, playField);
         }
         
         protected override void GetComponents()
         {
             base.GetComponents();
-            _movement = GetComponent<Movement>();
+            _movement = GetComponent<EnemyMovement>();
         }
         
         protected override void Subscribe()
