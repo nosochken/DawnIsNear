@@ -9,6 +9,7 @@ namespace Game.Gameplay
     {
         private CircleCollider2D _collider;
         private Rigidbody2D _rigidbody;
+        private Transform _ownerTransform;
         
         private readonly HashSet<IAbsorbable> _absorbables = new();
         private readonly HashSet<IAbsorber> _absorbers = new();
@@ -17,8 +18,9 @@ namespace Game.Gameplay
         internal IReadOnlyCollection<IAbsorbable> Absorbables => _absorbables;
         internal IReadOnlyCollection<IAbsorber> Absorbers => _absorbers;
         
-        public void Construct(float scannerRadius)
+        public void Construct(Transform ownerTransform, float scannerRadius)
         {
+            _ownerTransform = ownerTransform;
             _collider.radius = scannerRadius;
         }
 
@@ -33,6 +35,9 @@ namespace Game.Gameplay
 
         private void OnTriggerEnter2D(Collider2D other)
         {
+            if (IsOwner(other))
+                return;
+            
             if (!other.TryGetComponent(out IAbsorbable absorbable))
                 return;
             
@@ -47,10 +52,18 @@ namespace Game.Gameplay
 
         private void OnTriggerExit2D(Collider2D other)
         {
+            if (IsOwner(other))
+                return;
+            
             if (!other.TryGetComponent(out IAbsorbable absorbable))
                 return;
 
             Remove(absorbable);
+        }
+        
+        private bool IsOwner(Collider2D other)
+        {
+            return other.transform == _ownerTransform || other.transform.IsChildOf(_ownerTransform);
         }
 
         private void Remove(IAbsorbable absorbable)

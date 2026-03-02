@@ -4,7 +4,6 @@ namespace Game.Gameplay
 {
     internal sealed class BoundarySteering
     {
-        private const float MinSqrMagnitudeForDirection = 0.0001f;
         private const float AxisComponentEpsilon = 0.0001f;
 
         private readonly Collider2D _collider;
@@ -14,18 +13,18 @@ namespace Game.Gameplay
         private readonly float _epsilon;
         private readonly float _boundaryThreshold;
 
-        public BoundarySteering(Collider2D collider, PlayField playField,
+        internal BoundarySteering(Collider2D collider, PlayField playField,
             float avoidDistance, float epsilon, float boundaryThreshold)
         {
             _collider = collider;
             _playField = playField;
 
-            _avoidDistance = Mathf.Max(avoidDistance, 0.0001f);
-            _epsilon = Mathf.Max(epsilon, 0.000001f);
-            _boundaryThreshold = Mathf.Max(boundaryThreshold, 0f);
+            _avoidDistance = avoidDistance;
+            _epsilon = epsilon;
+            _boundaryThreshold = boundaryThreshold;
         }
 
-        public Vector2 ComputeBoundaryRepulsion(Vector2 position)
+        public Vector2 ComputeBoundaryRepulsion(Vector2 selfPosition)
         {
             //if (_playField == null || _collider == null)
                 //return Vector2.zero;
@@ -33,10 +32,10 @@ namespace Game.Gameplay
             GetAllowedBounds(out float minAllowedX, out float maxAllowedX, 
                 out float minAllowedY, out float maxAllowedY);
 
-            float distanceToLeftBoundary = position.x - minAllowedX;
-            float distanceToRightBoundary = maxAllowedX - position.x;
-            float distanceToBottomBoundary = position.y - minAllowedY;
-            float distanceToTopBoundary = maxAllowedY - position.y;
+            float distanceToLeftBoundary = selfPosition.x - minAllowedX;
+            float distanceToRightBoundary = maxAllowedX - selfPosition.x;
+            float distanceToBottomBoundary = selfPosition.y - minAllowedY;
+            float distanceToTopBoundary = maxAllowedY - selfPosition.y;
 
             Vector2 force = Vector2.zero;
 
@@ -48,7 +47,7 @@ namespace Game.Gameplay
             return force;
         }
 
-        public Vector2 ResolveDirection(Vector2 desiredDirection, Vector2 position, Vector2 escapeDirection)
+        public Vector2 ResolveDirection(Vector2 desiredDirection, Vector2 selfPosition, Vector2 threatForce)
         {
             //if (_playField == null || _collider == null)
                 //return GetNormalizeOrDefault(desiredDirection, Vector2.right);
@@ -56,29 +55,28 @@ namespace Game.Gameplay
             GetAllowedBounds(out float minAllowedX, out float maxAllowedX, 
                 out float minAllowedY, out float maxAllowedY);
 
-            Vector2 direction = desiredDirection;
+            Vector2 adjustedDirection = desiredDirection;
 
-            bool nearMinX = position.x <= minAllowedX + _boundaryThreshold;
-            bool nearMaxX = position.x >= maxAllowedX - _boundaryThreshold;
-            bool nearMinY = position.y <= minAllowedY + _boundaryThreshold;
-            bool nearMaxY = position.y >= maxAllowedY - _boundaryThreshold;
+            bool nearMinX = selfPosition.x <= minAllowedX + _boundaryThreshold;
+            bool nearMaxX = selfPosition.x >= maxAllowedX - _boundaryThreshold;
+            bool nearMinY = selfPosition.y <= minAllowedY + _boundaryThreshold;
+            bool nearMaxY = selfPosition.y >= maxAllowedY - _boundaryThreshold;
             
-            if ((nearMinX && direction.x < 0f) || (nearMaxX && direction.x > 0f))
-                direction.x = 0f;
+            if ((nearMinX && adjustedDirection.x < 0f) || (nearMaxX && adjustedDirection.x > 0f))
+                adjustedDirection.x = 0f;
 
-            if ((nearMinY && direction.y < 0f) || (nearMaxY && direction.y > 0f))
-                direction.y = 0f;
+            if ((nearMinY && adjustedDirection.y < 0f) || (nearMaxY && adjustedDirection.y > 0f))
+                adjustedDirection.y = 0f;
 
-            if (direction.sqrMagnitude > MinSqrMagnitudeForDirection)
-                return direction.normalized;
+            if (adjustedDirection.sqrMagnitude > SteeringMath.MinSqrMagnitudeForDirection)
+                return adjustedDirection.normalized;
             
             bool isNearVerticalBoundary = nearMinX || nearMaxX;
             bool isNearHorizontalBoundary = nearMinY || nearMaxY;
 
-            Vector2 preferredEscapeDirection =
-                GetNormalizeOrDefault(escapeDirection, GetNormalizeOrDefault(desiredDirection, Vector2.right));
+            Vector2 fallbackDirection = SelectFallbackDirection(threatForce, desiredDirection);
 
-            return ChooseAxisSlideDirection(isNearVerticalBoundary, isNearHorizontalBoundary, preferredEscapeDirection,
+            return SelectAxisSlideDirection(isNearVerticalBoundary, isNearHorizontalBoundary, fallbackDirection,
                 desiredDirection);
         }
         
@@ -107,31 +105,35 @@ namespace Game.Gameplay
             return awayDirection * weight;
         }
         
-        private Vector2 GetNormalizeOrDefault(Vector2 value, Vector2 defaultValue)
+        private Vector2 SelectFallbackDirection(Vector2 threatForce, Vector2 desiredDirection)
         {
-            return value.sqrMagnitude > MinSqrMagnitudeForDirection
-                ? value.normalized
-                : defaultValue;
+            if (threatForce.sqrMagnitude > SteeringMath.MinSqrMagnitudeForDirection)
+                return threatForce.normalized;
+
+            if (desiredDirection.sqrMagnitude > SteeringMath.MinSqrMagnitudeForDirection)
+                return desiredDirection.normalized;
+
+            return Vector2.right;
         }
         
-        private Vector2 ChooseAxisSlideDirection(bool isNearVerticalBoundary, bool isNearHorizontalBoundary,
-            Vector2 preferredEscapeDirection, Vector2 desiredDirection)
+        private Vector2 SelectAxisSlideDirection(bool isNearVerticalBoundary, bool isNearHorizontalBoundary,
+            Vector2 fallbackDirection, Vector2 desiredDirection)
         {
             bool slideAlongY;
 
             if (isNearVerticalBoundary && isNearHorizontalBoundary)
-                slideAlongY = Mathf.Abs(preferredEscapeDirection.y) >= Mathf.Abs(preferredEscapeDirection.x);
+                slideAlongY = Mathf.Abs(fallbackDirection.y) >= Mathf.Abs(fallbackDirection.x);
             else
                 slideAlongY = isNearVerticalBoundary;
 
             if (slideAlongY)
             {
-                float sign = GetSign(preferredEscapeDirection.y, desiredDirection.y);
+                float sign = GetSign(fallbackDirection.y, desiredDirection.y);
                 return new Vector2(0f, sign);
             }
             else
             {
-                float sign = GetSign(preferredEscapeDirection.x, desiredDirection.x);
+                float sign = GetSign(fallbackDirection.x, desiredDirection.x);
                 return new Vector2(sign, 0f);
             }
         }
