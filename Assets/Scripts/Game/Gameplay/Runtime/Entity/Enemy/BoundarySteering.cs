@@ -6,30 +6,25 @@ namespace Game.Gameplay
     {
         private const float AxisComponentEpsilon = 0.0001f;
 
-        private readonly Collider2D _collider;
-        private readonly PlayField _playField;
+        private readonly MovementBoundary _boundary;
 
         private readonly float _avoidDistance;
         private readonly float _epsilon;
         private readonly float _boundaryThreshold;
 
-        internal BoundarySteering(Collider2D collider, PlayField playField,
+        internal BoundarySteering(CapsuleCollider2D collider, PlayField playField,
             float avoidDistance, float epsilon, float boundaryThreshold)
         {
-            _collider = collider;
-            _playField = playField;
+            _boundary = new MovementBoundary(collider, playField);
 
             _avoidDistance = avoidDistance;
             _epsilon = epsilon;
             _boundaryThreshold = boundaryThreshold;
         }
 
-        public Vector2 ComputeBoundaryRepulsion(Vector2 selfPosition)
+        internal Vector2 ComputeBoundaryRepulsion(Vector2 selfPosition)
         {
-            //if (_playField == null || _collider == null)
-                //return Vector2.zero;
-
-            GetAllowedBounds(out float minAllowedX, out float maxAllowedX, 
+            _boundary.GetAllowedBounds(out float minAllowedX, out float maxAllowedX, 
                 out float minAllowedY, out float maxAllowedY);
 
             float distanceToLeftBoundary = selfPosition.x - minAllowedX;
@@ -47,29 +42,16 @@ namespace Game.Gameplay
             return force;
         }
 
-        public Vector2 ResolveDirection(Vector2 desiredDirection, Vector2 selfPosition, Vector2 threatForce)
+        internal Vector2 ResolveDirection(Vector2 desiredDirection, Vector2 selfPosition, Vector2 threatForce)
         {
-            //if (_playField == null || _collider == null)
-                //return GetNormalizeOrDefault(desiredDirection, Vector2.right);
-            
-            GetAllowedBounds(out float minAllowedX, out float maxAllowedX, 
-                out float minAllowedY, out float maxAllowedY);
-
             Vector2 adjustedDirection = desiredDirection;
+            _boundary.BlockOutboundAxes(ref adjustedDirection, selfPosition, _boundaryThreshold);
 
-            bool nearMinX = selfPosition.x <= minAllowedX + _boundaryThreshold;
-            bool nearMaxX = selfPosition.x >= maxAllowedX - _boundaryThreshold;
-            bool nearMinY = selfPosition.y <= minAllowedY + _boundaryThreshold;
-            bool nearMaxY = selfPosition.y >= maxAllowedY - _boundaryThreshold;
-            
-            if ((nearMinX && adjustedDirection.x < 0f) || (nearMaxX && adjustedDirection.x > 0f))
-                adjustedDirection.x = 0f;
-
-            if ((nearMinY && adjustedDirection.y < 0f) || (nearMaxY && adjustedDirection.y > 0f))
-                adjustedDirection.y = 0f;
-
-            if (adjustedDirection.sqrMagnitude > SteeringMath.MinSqrMagnitudeForDirection)
+            if (adjustedDirection.sqrMagnitude > DirectionMath.MinSqrMagnitudeForDirection)
                 return adjustedDirection.normalized;
+            
+            _boundary.GetNearFlags(out bool nearMinX, out bool nearMaxX, out bool nearMinY, out bool nearMaxY, 
+                selfPosition, _boundaryThreshold );
             
             bool isNearVerticalBoundary = nearMinX || nearMaxX;
             bool isNearHorizontalBoundary = nearMinY || nearMaxY;
@@ -78,18 +60,6 @@ namespace Game.Gameplay
 
             return SelectAxisSlideDirection(isNearVerticalBoundary, isNearHorizontalBoundary, fallbackDirection,
                 desiredDirection);
-        }
-        
-        private void GetAllowedBounds(out float minAllowedX, out float maxAllowedX, out float minAllowedY, out float maxAllowedY)
-        {
-            Vector2 extents = _collider.bounds.extents;
-            Vector2 min = _playField.MinPoint;
-            Vector2 max = _playField.MaxPoint;
-
-            minAllowedX = min.x + extents.x;
-            maxAllowedX = max.x - extents.x;
-            minAllowedY = min.y + extents.y;
-            maxAllowedY = max.y - extents.y;
         }
         
         private Vector2 ComputeRepulsionFromBoundary(Vector2 awayDirection, float distance)
@@ -107,10 +77,10 @@ namespace Game.Gameplay
         
         private Vector2 SelectFallbackDirection(Vector2 threatForce, Vector2 desiredDirection)
         {
-            if (threatForce.sqrMagnitude > SteeringMath.MinSqrMagnitudeForDirection)
+            if (threatForce.sqrMagnitude > DirectionMath.MinSqrMagnitudeForDirection)
                 return threatForce.normalized;
 
-            if (desiredDirection.sqrMagnitude > SteeringMath.MinSqrMagnitudeForDirection)
+            if (desiredDirection.sqrMagnitude > DirectionMath.MinSqrMagnitudeForDirection)
                 return desiredDirection.normalized;
 
             return Vector2.right;

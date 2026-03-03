@@ -6,11 +6,17 @@ namespace Game.Gameplay
     internal class PlayerMovement : Movement
     {
         private CapsuleCollider2D _collider;
-        private MovementBoundaryClamp _boundaryClamp;
+        private MovementBoundary _boundary;
+        
+        private float _maxDistance;
+        private float _stopDistance;
 
-        protected override void ExtendConstructor(PlayField playField)
+        protected override void ExtendConstructor(MovementDistanceData distanceData, PlayField playField)
         {
-            _boundaryClamp = new MovementBoundaryClamp(_collider, playField);
+            _maxDistance = distanceData.MaxDistance;
+            _stopDistance = distanceData.StopDistance;
+            
+            _boundary = new MovementBoundary(_collider, playField);
         }
 
         protected override void GetComponents()
@@ -18,14 +24,14 @@ namespace Game.Gameplay
             _collider = GetComponent<CapsuleCollider2D>();
         }
 
-        public void MoveTo(Vector2 targetPosition, int size)
+        internal void MoveTo(Vector2 targetPosition, int size)
         {
-            Vector2 toTarget  =  targetPosition - Rigidbody.position;
+            Vector2 toTarget  =  targetPosition - Position;
             float distance = toTarget.magnitude;
 
-            if (distance <= StopDistance)
+            if (distance <= _stopDistance)
             {
-                Rigidbody.velocity = Vector2.zero;
+                Stop();
                 return;
             }
 
@@ -35,19 +41,23 @@ namespace Game.Gameplay
             float speed = MaxSpeed * distanceFactor * sizeFactor;
             
             Vector2 velocity = toTarget.normalized * speed;
-            ApplyMovementWithBounds(velocity);
+            ApplyMovementWithBoundaries(velocity);
         }
         
-        private void ApplyMovementWithBounds(Vector2 velocity)
+        private float CalculateDistanceFactor(float distance)
         {
-            Vector2 currentPosition = Rigidbody.position;
-            _boundaryClamp.LimitVelocityWithBorder(ref velocity, currentPosition);
+            return Mathf.Clamp01(distance / _maxDistance);
+        }
+        
+        private void ApplyMovementWithBoundaries(Vector2 velocity)
+        {
+            Vector2 currentPosition = Position;
+            _boundary.BlockOutboundAxes(ref velocity, currentPosition);
             
-            Vector2 nextPosition = currentPosition + velocity * Time.fixedDeltaTime;
-            _boundaryClamp.LimitPositionWithBorder(ref nextPosition);
-
-            Rigidbody.MovePosition(nextPosition);
-            //_rigidbody.velocity = (nextPosition - currentPosition) / Time.fixedDeltaTime; //если что-то будет не так
+            Vector2 nextPosition = GetNextPosition(velocity);
+            _boundary.ClampPosition(ref nextPosition);
+            
+            Move(nextPosition);
         }
     }
 }

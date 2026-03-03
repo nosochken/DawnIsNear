@@ -8,37 +8,32 @@ namespace Game.Gameplay
         private const float FullSpeedFactor = 1f;
 
         private Rigidbody2D _rigidbody;
-
+        
+        private int _minSize;
         private float _maxSpeed;
-        private float _maxDistance;
-        private float _stopDistance;
-
+        
         private float _maxSpeedFactorAtMinSize;
         private float _minSpeedFactorLimit;
         private float _sizeInfluenceOnSpeed;
-    
-        private int _minSize;
         
-        protected Rigidbody2D Rigidbody => _rigidbody;
         protected float MaxSpeed => _maxSpeed;
-        protected float StopDistance => _stopDistance;
+        protected Vector2 Position => _rigidbody.position;
         
-        public void Construct(MovementData data, int minSize, PlayField playField)
+        internal void Construct(MovementSpeedData speedData, int minSize, PlayField playField, 
+            MovementDistanceData distanceData = null)
         {
-            _maxSpeed = data.MaxSpeed;
-            _maxDistance = data.MaxDistance;
-            _stopDistance = data.StopDistance;
-
-            _maxSpeedFactorAtMinSize = data.MaxSpeedFactorAtMinSize;
-            _minSpeedFactorLimit = data.MinSpeedFactorLimit;
-            _sizeInfluenceOnSpeed = data.SizeInfluenceOnSpeed;
-        
             _minSize = minSize;
+            _maxSpeed = speedData.MaxSpeed;
             
-            ExtendConstructor(playField);
+            _maxSpeedFactorAtMinSize = speedData.MaxSpeedFactorAtMinSize;
+            _minSpeedFactorLimit = speedData.MinSpeedFactorLimit;
+            _sizeInfluenceOnSpeed = speedData.SizeInfluenceOnSpeed;
+            
+            if (distanceData != null)
+                ExtendConstructor(distanceData, playField);
         }
 
-        protected virtual void ExtendConstructor(PlayField playField) { }
+        protected virtual void ExtendConstructor(MovementDistanceData distanceData, PlayField playField) { }
     
         private void Awake()
         {
@@ -50,11 +45,6 @@ namespace Game.Gameplay
         
         protected virtual void GetComponents() { }
 
-        protected float CalculateDistanceFactor(float distance)
-        {
-            return Mathf.Clamp01(distance / _maxDistance);
-        }
-
         protected float CalculateSizeFactor(int size)
         {
             int safeSize = Mathf.Max(_minSize, size);
@@ -65,6 +55,21 @@ namespace Game.Gameplay
                 factor = Mathf.Min(factor, _maxSpeedFactorAtMinSize);
 
             return Mathf.Clamp(factor, _minSpeedFactorLimit, FullSpeedFactor);
+        }
+
+        protected Vector2 GetNextPosition(Vector2 velocity)
+        {
+            return Position + velocity * Time.fixedDeltaTime;
+        }
+        
+        protected void Move(Vector2 nextPosition)
+        {
+            _rigidbody.MovePosition(nextPosition);
+        }
+
+        protected void Stop()
+        {
+            _rigidbody.velocity = Vector2.zero;
         }
     }
 }

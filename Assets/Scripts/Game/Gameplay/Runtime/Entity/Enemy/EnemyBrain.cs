@@ -87,7 +87,7 @@ namespace Game.Gameplay
                 preyForce * _preyWeight +
                 boundaryForce * _boundaryWeight;
 
-            if (desired.sqrMagnitude < SteeringMath.MinSqrMagnitudeForDirection)
+            if (desired.sqrMagnitude < DirectionMath.MinSqrMagnitudeForDirection)
                 desired = _wanderSteering.ComputeWander() * _wanderWeight;
             
             return NormalizeDirectionSafe(desired);
@@ -105,7 +105,7 @@ namespace Game.Gameplay
         {
             float sqrMagnitude = vector.sqrMagnitude;
 
-            if (sqrMagnitude < SteeringMath.MinSqrMagnitudeForDirection)
+            if (sqrMagnitude < DirectionMath.MinSqrMagnitudeForDirection)
                 return Vector2.right;
             
             if (sqrMagnitude > 1f)

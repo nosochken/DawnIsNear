@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 using Game.Input;
 
@@ -13,7 +14,10 @@ namespace Game.Gameplay
     
         protected override void ExtendConstructor(EntityConfigs config, PlayField playField)
         {
-            _movement.Construct(config.Movement, Size, playField);
+            if (config is not PlayerConfig playerConfig)
+                throw new ArgumentException("Player requires PlayerConfig");
+            
+            _movement.Construct(config.MovementSpeed, Size, playField, playerConfig.DistanceData);
         }
         
         protected override void GetComponents()

@@ -26,7 +26,7 @@ namespace Game.Gameplay
                 Vector2 toAbsorbable = absorbable.CurrentPosition - selfPosition;
                 float sqrAbsorbableDistance = toAbsorbable.sqrMagnitude;
                 
-                if (sqrAbsorbableDistance < SteeringMath.MinSqrMagnitudeForDirection || sqrAbsorbableDistance > absorbableRadiusSqr) continue;
+                if (sqrAbsorbableDistance < DirectionMath.MinSqrMagnitudeForDirection || sqrAbsorbableDistance > absorbableRadiusSqr) continue;
 
                 float distanceWeight = 1f / (sqrAbsorbableDistance + _epsilon);
                 sum += toAbsorbable.normalized * distanceWeight;

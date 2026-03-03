@@ -14,7 +14,7 @@ namespace Game.Gameplay
         
         protected override void ExtendConstructor(EntityConfigs config, PlayField playField)
         {
-            _movement.Construct(config.Movement, Size, playField);
+            _movement.Construct(config.MovementSpeed, Size, playField);
         }
         
         protected override void GetComponents()

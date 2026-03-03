@@ -34,7 +34,7 @@ namespace Game.Gameplay
 
                 Vector2 toPrey = prey.CurrentPosition - selfPosition;
                 float sqrPreyDistance = toPrey.sqrMagnitude;
-                if (sqrPreyDistance < SteeringMath.MinSqrMagnitudeForDirection || sqrPreyDistance > preyRadiusSqr) continue;
+                if (sqrPreyDistance < DirectionMath.MinSqrMagnitudeForDirection || sqrPreyDistance > preyRadiusSqr) continue;
 
                 float distanceWeight = 1f / (sqrPreyDistance + _epsilon);
 
@@ -48,7 +48,7 @@ namespace Game.Gameplay
             {
                 Vector2 toMainTarget = mainTarget.CurrentPosition - selfPosition;
                 
-                if (toMainTarget.sqrMagnitude > SteeringMath.MinSqrMagnitudeForDirection)
+                if (toMainTarget.sqrMagnitude > DirectionMath.MinSqrMagnitudeForDirection)
                     sum += toMainTarget.normalized * _mainTargetHuntBias;
             }
 

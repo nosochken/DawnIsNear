@@ -32,7 +32,7 @@ namespace Game.Gameplay
 
                 Vector2 away = selfPosition - threat.CurrentPosition;
                 float sqrAwayDistance = away.sqrMagnitude;
-                if (sqrAwayDistance < SteeringMath.MinSqrMagnitudeForDirection || sqrAwayDistance > dangerRadiusSqr) continue;
+                if (sqrAwayDistance < DirectionMath.MinSqrMagnitudeForDirection || sqrAwayDistance > dangerRadiusSqr) continue;
 
                 float awayDistance = Mathf.Sqrt(sqrAwayDistance);
                 float currentPanic = 1f - (awayDistance / _dangerRadius);
