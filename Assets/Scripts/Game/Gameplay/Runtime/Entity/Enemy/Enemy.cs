@@ -12,8 +12,10 @@ namespace Game.Gameplay
         
         public event Action<Enemy> ReadyToSpawn;
         
-        protected override void ExtendConstructor(EntityConfigs config, PlayField playField)
+        public void Construct(EnemyConfig config, PlayField playField)
         {
+            ConstructBase(config.Size);
+            
             _movement.Construct(config.MovementSpeed, Size, playField);
         }
         

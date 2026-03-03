@@ -11,13 +11,14 @@ namespace Game.Gameplay
         private PlayerInputController _input;
         private ScreenToWorld _screenToWorld;
         private PlayerMovement _movement;
-    
-        protected override void ExtendConstructor(EntityConfigs config, PlayField playField)
+
+        //[Inject]
+        //сделать у всех Inject private
+        public void Construct(PlayerConfig config, PlayField playField)
         {
-            if (config is not PlayerConfig playerConfig)
-                throw new ArgumentException("Player requires PlayerConfig");
+            ConstructBase(config.Size);
             
-            _movement.Construct(config.MovementSpeed, Size, playField, playerConfig.DistanceData);
+            _movement.Construct(config.MovementSpeed, Size, playField, config.DistanceData);
         }
         
         protected override void GetComponents()

@@ -16,10 +16,8 @@ MonoBehaviour:
     _minSize: 1
     _maxSize: 20
     _delayInDecrease: 3
-  _movement:
+  _movementSpeed:
     _maxSpeed: 9
-    _stopDistance: 0
-    _maxDistance: 0
     _maxSpeedFactorAtMinSize: 0.6
     _minSpeedFactorLimit: 0.3
     _sizeInfluenceOnSpeed: 1.1
