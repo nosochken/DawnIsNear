@@ -2,12 +2,14 @@ using System.Collections;
 using UnityEngine;
 using UnityEngine.Pool;
 using System;
+using Zenject;
 
 namespace Game.Gameplay
 {
     public class Spawner<T> : MonoBehaviour where T : MonoBehaviour, ISpawnable<T>
     {
         private T _prefab;
+        private DiContainer _container;
         private PlayField _playField;
 
         private ObjectPool<T> _pool;
@@ -20,12 +22,18 @@ namespace Game.Gameplay
         private Coroutine _spawnRoutine;
         private WaitUntil _waitUntilHasSpace;
 
-        public void Construct(T prefab, int capacity, PlayField playField)
+        [Inject]
+        private void Construct(DiContainer container, PlayField playField)
+        {
+            _container = container;
+            _playField = playField;
+        }
+        
+        public void Initialize(T prefab, int capacity)
         {
             _prefab = prefab;
             _poolCapacity = Mathf.Max(0, capacity);
             _poolMaxSize = _poolCapacity;
-            _playField = playField;
 
             _pool = new ObjectPool<T>(
                 createFunc: Create,
@@ -71,13 +79,14 @@ namespace Game.Gameplay
 
         private T Create()
         {
-            T spawnable = Instantiate(_prefab);
-            AdditionalCreationSettings(spawnable, _playField);
+            T spawnable = _container.InstantiatePrefabForComponent<T>(_prefab);
+            spawnable.gameObject.SetActive(false);
+            AdditionalCreationSettings(spawnable);
 
             return spawnable;
         }
         
-        protected virtual void AdditionalCreationSettings(T spawnable, PlayField playField) { }
+        protected virtual void AdditionalCreationSettings(T spawnable) { }
 
         private void ActOnGet(T spawnable)
         {

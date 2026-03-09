@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using Game.Gameplay;
 using UnityEngine;
+using Zenject;
 
 namespace Game.GameFlow
 {
@@ -17,16 +18,20 @@ namespace Game.GameFlow
         public event Action Won;
         public event Action Lost;
 
-        public void Construct(LevelConfig config, Player player, 
-            Dictionary<EnemyConfig, EnemySpawner> enemySpawners, Spawner<Food> foodSpawner)
+        [Inject]
+        private void Construct(LevelConfig config, Player player)
         {
             _levelConfig = config;
             _player = player;
+        }
+        
+        internal void Initialize(Dictionary<EnemyConfig, EnemySpawner> enemySpawners, Spawner<Food> foodSpawner)
+        {
             _enemySpawners = enemySpawners;
             _foodSpawner = foodSpawner;
         }
 
-        public void StartLevel()
+        internal void StartLevel()
         {
             if (_isRunning)
                 return;
@@ -47,7 +52,7 @@ namespace Game.GameFlow
             _player.Absorbed += OnPlayerAbsorbed;
         }
 
-        public void StopLevel()
+        internal void StopLevel()
         {
             if (!_isRunning)
                 return;

@@ -1,44 +1,50 @@
 using System.Collections.Generic;
-using UnityEngine;
 using Game.Gameplay;
-using Game.Presentation;
+using UnityEngine;
+using Zenject;
 
 namespace Game.GameFlow
 {
-    internal class LevelInstaller : MonoBehaviour
+    internal sealed class LevelInstaller : MonoInstaller
     {
-        [SerializeField] private LevelConfig _config;
+        [SerializeField] private LevelConfig _levelConfig;
         [SerializeField] private LevelController _levelController;
-        [SerializeField] private CameraMovement _cameraMovement;
-        [SerializeField] private PlayField _playField;
         [SerializeField] private EnemySpawner _enemySpawnerPrefab;
         [SerializeField] private FoodSpawner _foodSpawnerPrefab;
+        [SerializeField] private PlayField _playField;
 
-        public LevelController BuildLevel()
+        public override void InstallBindings()
         {
-            Player player = Instantiate(_config.PlayerConfig.Prefab);
-            player.Construct(_config.PlayerConfig, _playField);
-            _cameraMovement.Construct(player, _playField);
-
-            Dictionary<EnemyConfig, EnemySpawner> enemySpawners = ConstructEnemySpawners(player);
-
-            Spawner<Food> foodSpawner = Instantiate(_foodSpawnerPrefab);
-            foodSpawner.Construct(_config.Food.Prefab, _config.Food.Count, _playField);
+            Container.Bind<LevelConfig>().FromInstance(_levelConfig).AsSingle();
             
-            _levelController.Construct(_config, player, enemySpawners, foodSpawner);
+            Container.Bind<PlayerConfig>().FromInstance(_levelConfig.PlayerConfig).AsSingle();
+            Container.Bind<Player>().FromComponentInNewPrefab(_levelConfig.PlayerConfig.Prefab).AsSingle().NonLazy();
+            Container.Bind<ITargetable>().To<Player>().FromResolve();
+            
+            Container.Bind<PlayField>().FromInstance(_playField).AsSingle();
+        }
+        
+        internal LevelController BuildLevel()
+        {
+            Dictionary<EnemyConfig, EnemySpawner> enemySpawners = ConstructEnemySpawners();
+
+            Spawner<Food> foodSpawner = Container.InstantiatePrefabForComponent<FoodSpawner>(_foodSpawnerPrefab);
+            foodSpawner.Initialize(_levelConfig.Food.Prefab, _levelConfig.Food.Count);
+            
+            _levelController.Initialize(enemySpawners, foodSpawner);
 
             return _levelController;
         }
-
-        private Dictionary<EnemyConfig, EnemySpawner> ConstructEnemySpawners(ITargetable target)
+        
+        private Dictionary<EnemyConfig, EnemySpawner> ConstructEnemySpawners()
         {
             Dictionary<EnemyConfig, EnemySpawner> enemySpawners = new Dictionary<EnemyConfig, EnemySpawner>();
             
-            foreach (EnemySpawnData data in _config.Enemies)
+            foreach (EnemySpawnData data in _levelConfig.Enemies)
             {
-                EnemySpawner enemySpawner = Instantiate(_enemySpawnerPrefab);
-                enemySpawner.Construct(data.Config.Prefab, data.Count, _playField);
-                enemySpawner.ConstructEnemyBrain(data.Config,target);
+                EnemySpawner enemySpawner = Container.InstantiatePrefabForComponent<EnemySpawner>(_enemySpawnerPrefab);
+                enemySpawner.Initialize(data.Config.Prefab, data.Count);
+                enemySpawner.InitializeEnemy(data.Config);
                 enemySpawners.Add(data.Config, enemySpawner);
             }
 

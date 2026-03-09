@@ -3,7 +3,7 @@ using UnityEngine.SceneManagement;
 
 namespace Game.GameFlow
 {
-    public class GameFlow : MonoBehaviour
+    internal class GameFlow : MonoBehaviour
     {
         private enum State
         {
@@ -31,12 +31,12 @@ namespace Game.GameFlow
             StartGame();
         }
 
-        public void StartGame()
+        internal void StartGame()
         {
             LoadLevel(_startLevelIndex);
         }
 
-        public void LoadLevel(int levelIndex)
+        internal void LoadLevel(int levelIndex)
         {
             CleanupLevel();
 
@@ -49,7 +49,7 @@ namespace Game.GameFlow
             SceneManager.LoadScene($"Level_{levelIndex}");
         }
 
-        public void RestartLevel()
+        internal void RestartLevel()
         {
             if (_state == State.Loading)
                 return;
@@ -57,7 +57,7 @@ namespace Game.GameFlow
             LoadLevel(_currentLevelIndex);
         }
 
-        public void Pause(bool isPaused)
+        internal void Pause(bool isPaused)
         {
             if (_state != State.Playing && _state != State.Paused)
                 return;
@@ -66,7 +66,7 @@ namespace Game.GameFlow
             Time.timeScale = isPaused ? 0f : 1f;
         }
 
-        public void ContinueAfterWin()
+        internal void ContinueAfterWin()
         {
             if (_state != State.Won)
                 return;
@@ -74,7 +74,7 @@ namespace Game.GameFlow
             LoadLevel(_currentLevelIndex + 1);
         }
 
-        public void RetryAfterLose()
+        internal void RetryAfterLose()
         {
             if (_state != State.Lost)
                 return;

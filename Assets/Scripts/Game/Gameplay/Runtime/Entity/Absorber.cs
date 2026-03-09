@@ -22,16 +22,12 @@ namespace Game.Gameplay
         public bool IsActive => isActiveAndEnabled;
         public Vector2 CurrentPosition => transform.position;
         
-        protected void ConstructBase(SizeData data)
+        protected void InitializeBase(SizeData data)
         {
             MinSize = data.MinSize;
             //_maxSize = config.Size.MaxSize;
-            Size = MinSize;
-            SizeChanged?.Invoke(Size);
             
             _absorbOverTimeInterval = data.DelayInDecrease;
-            
-            _beAbsorbedCoroutine = StartCoroutine(BeAbsorbedOverTime());
         }
 
         private void Awake()
@@ -46,6 +42,12 @@ namespace Game.Gameplay
         {
             _absorbableDetector.Detected +=  OnDetected;
             Subscribe();
+
+            Size = MinSize;
+            SizeChanged?.Invoke(Size);
+            
+            if (_beAbsorbedCoroutine == null) 
+                _beAbsorbedCoroutine = StartCoroutine(BeAbsorbedOverTime());
         }
         
         protected virtual void Subscribe() { }
@@ -56,8 +58,11 @@ namespace Game.Gameplay
             
             Unsubscribe();
             
-            if(_beAbsorbedCoroutine != null)
+            if (_beAbsorbedCoroutine != null)
+            {
                 StopCoroutine(_beAbsorbedCoroutine);
+                _beAbsorbedCoroutine = null;
+            }
         }
         
         protected virtual void Unsubscribe() { }
@@ -79,6 +84,7 @@ namespace Game.Gameplay
 
                 if (Size <= 0)
                     BeAbsorbed();
+                    
                 else
                     SizeChanged?.Invoke(Size);
             }

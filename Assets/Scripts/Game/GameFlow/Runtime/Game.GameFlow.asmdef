@@ -1,8 +1,19 @@
 {
-	"name": "Game.GameFlow",
-	"references": [
-		"Game.Gameplay",
-		"Game.Input",
-		"Game.Presentation"
-	]
+    "name": "Game.GameFlow",
+    "rootNamespace": "",
+    "references": [
+        "Game.Gameplay",
+        "Game.Input",
+        "Game.Presentation",
+        "Zenject"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
 }

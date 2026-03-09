@@ -19,8 +19,7 @@ namespace Game.Gameplay
         protected float MaxSpeed => _maxSpeed;
         protected Vector2 Position => _rigidbody.position;
         
-        internal void Construct(MovementSpeedData speedData, int minSize, PlayField playField, 
-            MovementDistanceData distanceData = null)
+        internal void Initialize(MovementSpeedData speedData, int minSize)
         {
             _minSize = minSize;
             _maxSpeed = speedData.MaxSpeed;
@@ -28,12 +27,7 @@ namespace Game.Gameplay
             _maxSpeedFactorAtMinSize = speedData.MaxSpeedFactorAtMinSize;
             _minSpeedFactorLimit = speedData.MinSpeedFactorLimit;
             _sizeInfluenceOnSpeed = speedData.SizeInfluenceOnSpeed;
-            
-            if (distanceData != null)
-                ExtendConstructor(distanceData, playField);
         }
-
-        protected virtual void ExtendConstructor(MovementDistanceData distanceData, PlayField playField) { }
     
         private void Awake()
         {

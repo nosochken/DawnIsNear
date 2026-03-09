@@ -1,4 +1,5 @@
 using UnityEngine;
+using Zenject;
 
 namespace Game.Gameplay
 {
@@ -7,21 +8,25 @@ namespace Game.Gameplay
     {
         private CapsuleCollider2D _collider;
         private MovementBoundary _boundary;
+        private PlayField _playField;
         
         private float _maxDistance;
         private float _stopDistance;
-
-        protected override void ExtendConstructor(MovementDistanceData distanceData, PlayField playField)
+        
+        [Inject]
+        private void Construct(PlayerConfig config, PlayField playField)
         {
-            _maxDistance = distanceData.MaxDistance;
-            _stopDistance = distanceData.StopDistance;
+            _playField = playField;
             
-            _boundary = new MovementBoundary(_collider, playField);
+            Initialize(config.MovementSpeed, config.Size.MinSize);
+            _maxDistance = config.DistanceData.MaxDistance;
+            _stopDistance = config.DistanceData.StopDistance;
         }
 
         protected override void GetComponents()
         {
             _collider = GetComponent<CapsuleCollider2D>();
+            _boundary = new MovementBoundary(_collider, _playField);
         }
 
         internal void MoveTo(Vector2 targetPosition, int size)

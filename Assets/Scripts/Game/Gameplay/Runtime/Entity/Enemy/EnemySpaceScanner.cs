@@ -18,7 +18,7 @@ namespace Game.Gameplay
         internal IReadOnlyCollection<IAbsorbable> Absorbables => _absorbables;
         internal IReadOnlyCollection<IAbsorber> Absorbers => _absorbers;
         
-        public void Construct(Transform ownerTransform, float scannerRadius)
+        internal void Initialize(Transform ownerTransform, float scannerRadius)
         {
             _ownerTransform = ownerTransform;
             _collider.radius = scannerRadius;

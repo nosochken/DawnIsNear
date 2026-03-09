@@ -1,6 +1,6 @@
-using System;
 using UnityEngine;
 using Game.Input;
+using Zenject;
 
 namespace Game.Gameplay
 {
@@ -11,14 +11,11 @@ namespace Game.Gameplay
         private PlayerInputController _input;
         private ScreenToWorld _screenToWorld;
         private PlayerMovement _movement;
-
-        //[Inject]
-        //сделать у всех Inject private
-        public void Construct(PlayerConfig config, PlayField playField)
+        
+        [Inject]
+        private void Construct(PlayerConfig config)
         {
-            ConstructBase(config.Size);
-            
-            _movement.Construct(config.MovementSpeed, Size, playField, config.DistanceData);
+            InitializeBase(config.Size);
         }
         
         protected override void GetComponents()

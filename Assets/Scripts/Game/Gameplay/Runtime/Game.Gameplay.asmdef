@@ -1,6 +1,17 @@
 {
     "name": "Game.Gameplay",
+    "rootNamespace": "",
     "references": [
-        "Game.Input"
-    ]
+        "Game.Input",
+        "Zenject"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
 }

@@ -1,13 +1,14 @@
 using UnityEngine;
+using Zenject;
 
 namespace Game.Gameplay
 {
     [RequireComponent(typeof(Enemy))]
     internal class EnemyBrain : MonoBehaviour
     {
-        private Enemy _self;
         private IAbsorbable _mainTarget;
         private EnemySpaceScanner _spaceScanner;
+        private PlayField _playField;
        
         private ThreatSteering _threatSteering;
         private AbsorbableSteering _absorbableSteering;
@@ -24,13 +25,18 @@ namespace Game.Gameplay
         
         private float _directionChangeRate;
         private Vector2 _smoothedDirection = Vector2.right;
-        
-        public void Construct(CapsuleCollider2D collider, EnemyBrainData data, ITargetable mainTarget, PlayField playField)
+
+        [Inject]
+        private void Construct(ITargetable mainTarget, PlayField playField)
         {
             _mainTarget = (IAbsorbable)mainTarget;
-            
+            _playField = playField;
+        }
+
+        internal void Initialize(Transform selfTransform, CapsuleCollider2D collider, EnemyBrainData data)
+        {
             float scannerRadius = Mathf.Max(data.DangerRadius, data.AbsorbRadius);
-            _spaceScanner.Construct(_self.transform, scannerRadius);
+            _spaceScanner.Initialize(selfTransform, scannerRadius);
 
             _absorbableWeight = data.AbsorbableWeight;
             _preyWeight =  data.PreyWeight;
@@ -49,7 +55,7 @@ namespace Game.Gameplay
             _preySteering = new PreySteering(data.AbsorbRadius, data.MinBoost,
                 data.MaxPreyAttractionBoost, data.MainTargetHuntBias, data.SqrDistanceEpsilon);
             
-            _boundarySteering = new BoundarySteering(collider, playField, data.BoundaryAvoidDistance,
+            _boundarySteering = new BoundarySteering(collider, _playField, data.BoundaryAvoidDistance,
                 data.BoundaryDistanceEpsilon, data.BoundaryThreshold);
             
             _wanderSteering = new WanderSteering(data.MinDelayWanderChange, data.MaxDelayWanderChange);
@@ -57,19 +63,18 @@ namespace Game.Gameplay
 
         private void Awake()
         {
-            _self = GetComponent<Enemy>();
             _spaceScanner = GetComponentInChildren<EnemySpaceScanner>();
         }
 
-        private void Update()
+        internal Vector2 GetBestTarget(Vector2 position, int size)
         {
-            Vector2 selfPosition = _self.CurrentPosition;
-            int selfSize = _self.Size;
+            Vector2 selfPosition = position;
+            int selfSize = size;
             
             Vector2 desiredDirection = ComputeDesiredDirection(out Vector2 threatForce, selfPosition, selfSize);
             desiredDirection = _boundarySteering.ResolveDirection(desiredDirection, selfPosition, threatForce);
             
-            ApplySmoothedDirection(desiredDirection);
+            return GetSmoothedDirection(desiredDirection);
         }
 
         private Vector2 ComputeDesiredDirection(out Vector2 threatForce, Vector2 selfPosition, int selfSize)
@@ -93,12 +98,10 @@ namespace Game.Gameplay
             return NormalizeDirectionSafe(desired);
         }
 
-        private void ApplySmoothedDirection(Vector2 desiredDirection)
+        private Vector2 GetSmoothedDirection(Vector2 desiredDirection)
         {
             _smoothedDirection = Vector2.Lerp(_smoothedDirection, desiredDirection, _directionChangeRate * Time.deltaTime); 
-            _smoothedDirection = NormalizeDirectionSafe(_smoothedDirection);
-
-            _self.SetTargetDirection(_smoothedDirection);
+            return NormalizeDirectionSafe(_smoothedDirection);
         }
         
         private Vector2 NormalizeDirectionSafe(Vector2 vector)

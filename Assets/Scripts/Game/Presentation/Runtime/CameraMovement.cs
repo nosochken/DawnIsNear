@@ -1,5 +1,6 @@
 using Game.Gameplay;
 using UnityEngine;
+using Zenject;
 
 namespace Game.Presentation
 {
@@ -9,7 +10,8 @@ namespace Game.Presentation
         private ITargetable _target;
         private PlayField _playField;
         
-        public void Construct(ITargetable  target, PlayField playField)
+        [Inject]
+        private void Construct(ITargetable  target, PlayField playField)
         {
             _target = target;
             _playField = playField;
