@@ -46,8 +46,7 @@ namespace Game.GameFlow
             Dictionary<EnemyConfig, EnemySpawner> enemySpawners = ConstructEnemySpawners();
 
             Spawner<Food> foodSpawner = Container.InstantiatePrefabForComponent<FoodSpawner>(_foodSpawnerPrefab);
-            foodSpawner.Initialize(_levelConfig.FoodSpawnData.Prefab, _levelConfig.FoodSpawnData.Count, 
-                prefab => CreateFood(prefab));
+            foodSpawner.Initialize(() => CreateFood(), _levelConfig.FoodSpawnData.Count);
             
             _levelController.Initialize(enemySpawners, foodSpawner);
 
@@ -61,8 +60,7 @@ namespace Game.GameFlow
             foreach (EnemySpawnData data in _levelConfig.EnemySpawnData)
             {
                 EnemySpawner enemySpawner = Container.InstantiatePrefabForComponent<EnemySpawner>(_enemySpawnerPrefab);
-                enemySpawner.Initialize(data.Config.Prefab, data.Count,
-                    prefab => CreateEnemy(prefab, data.Config));
+                enemySpawner.Initialize(() => CreateEnemy(data.Config.Prefab, data.Config), data.Count);
                 enemySpawners.Add(data.Config, enemySpawner);
             }
 
@@ -74,9 +72,9 @@ namespace Game.GameFlow
             return Container.InstantiatePrefabForComponent<Enemy>(prefab, new object[] { config });
         }
 
-        private Food CreateFood(Food prefab)
+        private Food CreateFood()
         {
-            return Container.InstantiatePrefabForComponent<Food>(prefab);
+            return Container.InstantiatePrefabForComponent<Food>(_levelConfig.FoodSpawnData.Prefab);
         }
     }
 }

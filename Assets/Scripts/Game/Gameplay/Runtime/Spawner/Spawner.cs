@@ -8,8 +8,7 @@ namespace Game.Gameplay
 {
     public class Spawner<T> : MonoBehaviour where T : MonoBehaviour, ISpawnable<T>
     {
-        private T _prefab;
-        private Func<T, T> _createSpawnable;
+        private Func<T> _createSpawnable;
         private PlayField _playField;
 
         private ObjectPool<T> _pool;
@@ -28,10 +27,9 @@ namespace Game.Gameplay
             _playField = playField ?? throw new ArgumentNullException(nameof(playField));
         }
         
-        public void Initialize(T prefab, int capacity, Func<T, T> factory)
+        public void Initialize(Func<T> createSpawnable, int capacity)
         {
-            _prefab = prefab ?? throw new ArgumentNullException(nameof(prefab));
-            _createSpawnable = factory ?? throw new ArgumentNullException(nameof(factory));
+            _createSpawnable = createSpawnable ?? throw new ArgumentNullException(nameof(createSpawnable));
             
             if (capacity <= 0)
                 throw new ArgumentOutOfRangeException(nameof(capacity));
@@ -89,7 +87,7 @@ namespace Game.Gameplay
 
         private T Create()
         {
-            return _createSpawnable(_prefab);
+            return _createSpawnable();
         }
 
         private void ActOnGet(T spawnable)
