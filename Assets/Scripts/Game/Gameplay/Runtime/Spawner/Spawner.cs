@@ -9,7 +9,7 @@ namespace Game.Gameplay
     public class Spawner<T> : MonoBehaviour where T : MonoBehaviour, ISpawnable<T>
     {
         private T _prefab;
-        private DiContainer _container;
+        private Func<T, T> _createSpawnable;
         private PlayField _playField;
 
         private ObjectPool<T> _pool;
@@ -23,21 +23,19 @@ namespace Game.Gameplay
         private WaitUntil _waitUntilHasSpace;
 
         [Inject]
-        private void Construct(DiContainer container, PlayField playField)
+        private void Construct(PlayField playField)
         {
-            _container = container ?? throw new ArgumentNullException(nameof(container));
             _playField = playField ?? throw new ArgumentNullException(nameof(playField));
         }
         
-        public void Initialize(T prefab, int capacity)
+        public void Initialize(T prefab, int capacity, Func<T, T> factory)
         {
-            if (prefab == null)
-                throw new ArgumentNullException(nameof(prefab));
-
+            _prefab = prefab ?? throw new ArgumentNullException(nameof(prefab));
+            _createSpawnable = factory ?? throw new ArgumentNullException(nameof(factory));
+            
             if (capacity <= 0)
                 throw new ArgumentOutOfRangeException(nameof(capacity));
             
-            _prefab = prefab;
             _poolCapacity = capacity;
             _poolMaxSize = _poolCapacity;
 
@@ -91,12 +89,7 @@ namespace Game.Gameplay
 
         private T Create()
         {
-            return CreateSpawnable(_container, _prefab);
-        }
-
-        protected virtual T CreateSpawnable(DiContainer container, T prefab)
-        {
-            return container.InstantiatePrefabForComponent<T>(prefab);
+            return _createSpawnable(_prefab);
         }
 
         private void ActOnGet(T spawnable)
