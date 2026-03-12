@@ -32,8 +32,6 @@ namespace Game.GameFlow
             
             _levelConfig.Validate();
             
-            Container.Bind<LevelConfig>().FromInstance(_levelConfig).AsSingle();
-            
             Container.Bind<PlayerConfig>().FromInstance(_levelConfig.PlayerConfig).AsSingle();
             Container.Bind<Player>().FromComponentInNewPrefab(_levelConfig.PlayerConfig.Prefab).AsSingle().NonLazy();
             Container.Bind<ITargetable>().To<Player>().FromResolve();
@@ -43,25 +41,25 @@ namespace Game.GameFlow
         
         internal LevelController BuildLevel()
         {
-            Dictionary<EnemyConfig, EnemySpawner> enemySpawners = ConstructEnemySpawners();
+            List<EnemySpawner> enemySpawners = ConstructEnemySpawners();
 
             Spawner<Food> foodSpawner = Container.InstantiatePrefabForComponent<FoodSpawner>(_foodSpawnerPrefab);
-            foodSpawner.Initialize(() => CreateFood(), _levelConfig.FoodSpawnData.Count);
+            foodSpawner.Initialize(CreateFood, _levelConfig.FoodSpawnData.Count);
             
             _levelController.Initialize(enemySpawners, foodSpawner);
 
             return _levelController;
         }
         
-        private Dictionary<EnemyConfig, EnemySpawner> ConstructEnemySpawners()
+        private List<EnemySpawner> ConstructEnemySpawners()
         {
-            Dictionary<EnemyConfig, EnemySpawner> enemySpawners = new Dictionary<EnemyConfig, EnemySpawner>();
+            List<EnemySpawner> enemySpawners = new List<EnemySpawner>();
             
             foreach (EnemySpawnData data in _levelConfig.EnemySpawnData)
             {
                 EnemySpawner enemySpawner = Container.InstantiatePrefabForComponent<EnemySpawner>(_enemySpawnerPrefab);
                 enemySpawner.Initialize(() => CreateEnemy(data.Config.Prefab, data.Config), data.Count);
-                enemySpawners.Add(data.Config, enemySpawner);
+                enemySpawners.Add(enemySpawner);
             }
 
             return enemySpawners;

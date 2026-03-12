@@ -11,14 +11,10 @@ namespace Game.GameFlow
         [SerializeField] private PlayerConfig _playerConfig;
         [SerializeField] private EnemySpawnData[] _enemySpawnData;
         [SerializeField] private FoodSpawnData _foodSpawnData;
-
-        [SerializeField] private int _playerWinSize;
         
         public PlayerConfig PlayerConfig => _playerConfig;
         public IReadOnlyList<EnemySpawnData> EnemySpawnData => _enemySpawnData;
         public FoodSpawnData FoodSpawnData => _foodSpawnData;
-
-        public int PlayerWinSize => _playerWinSize;
         
         public void Validate()
         {
@@ -33,15 +29,8 @@ namespace Game.GameFlow
 
             if (_foodSpawnData == null)
                 throw new ArgumentNullException(nameof(_foodSpawnData));
-
-            if (_playerWinSize <= 0)
-                throw new ArgumentOutOfRangeException(nameof(_playerWinSize));
             
             _playerConfig.Validate();
-
-            if (_playerWinSize < _playerConfig.Size.MinSize)
-                throw new ArgumentException($"{nameof(_playerWinSize)} must be greater than or equal to player min size");
-            
             _foodSpawnData.Validate();
 
             for (int i = 0; i < _enemySpawnData.Length; i++)

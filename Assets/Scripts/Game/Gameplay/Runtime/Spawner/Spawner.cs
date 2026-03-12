@@ -13,13 +13,15 @@ namespace Game.Gameplay
 
         private ObjectPool<T> _pool;
 
-        private int _poolCapacity;
-        private int _poolMaxSize;
-
+        private int _targetCount;
         private int _activeCount;
 
         private Coroutine _spawnRoutine;
         private WaitUntil _waitUntilHasSpace;
+        
+        public event Action ActiveCountDecreased;
+        
+        public int ActiveCount => _activeCount;
 
         [Inject]
         private void Construct(PlayField playField)
@@ -27,15 +29,14 @@ namespace Game.Gameplay
             _playField = playField ?? throw new ArgumentNullException(nameof(playField));
         }
         
-        public void Initialize(Func<T> createSpawnable, int capacity)
+        public void Initialize(Func<T> createSpawnable, int targetCount)
         {
             _createSpawnable = createSpawnable ?? throw new ArgumentNullException(nameof(createSpawnable));
             
-            if (capacity <= 0)
-                throw new ArgumentOutOfRangeException(nameof(capacity));
+            if (targetCount <= 0)
+                throw new ArgumentOutOfRangeException(nameof(targetCount));
             
-            _poolCapacity = capacity;
-            _poolMaxSize = _poolCapacity;
+            _targetCount = targetCount;
 
             _pool = new ObjectPool<T>(
                 createFunc: Create,
@@ -43,8 +44,8 @@ namespace Game.Gameplay
                 actionOnRelease: ActOnRelease,
                 actionOnDestroy: ActOnDestroy,
                 collectionCheck: true,
-                defaultCapacity: _poolCapacity,
-                maxSize: _poolMaxSize);
+                defaultCapacity: _targetCount,
+                maxSize: _targetCount);
         }
         
         private void OnDisable()
@@ -52,27 +53,21 @@ namespace Game.Gameplay
             StopSpawn();
         }
 
-        public void Spawn(int count)
+        public void SpawnTargetCount()
         {
             if (_pool == null)
                 throw new InvalidOperationException("Spawner is not initialized.");
-            
-            if (count <= 0)
-                throw new ArgumentOutOfRangeException(nameof(count));
 
-            for (int i = 0; i < count; i++)
+            for (int i = 0; i < _targetCount; i++)
                 _pool.Get();
         }
 
-        public void MaintainCount(int count)
+        public void MaintainTargetCount()
         {
             if (_pool == null)
                 throw new InvalidOperationException("Spawner is not initialized.");
-            
-            if (count <= 0)
-                throw new ArgumentOutOfRangeException(nameof(count));
 
-            _waitUntilHasSpace = new WaitUntil(() => _activeCount < count);
+            _waitUntilHasSpace = new WaitUntil(() => _activeCount < _targetCount);
             _spawnRoutine = StartCoroutine(SpawnLoop(_waitUntilHasSpace));
         }
 
@@ -103,9 +98,11 @@ namespace Game.Gameplay
         private void ActOnRelease(T spawnable)
         {
             spawnable.ReadyToSpawn -= ReturnToPool;
-
+            
             spawnable.gameObject.SetActive(false);
+            
             _activeCount--;
+            ActiveCountDecreased?.Invoke();
         }
 
         private void ActOnDestroy(T spawnable)

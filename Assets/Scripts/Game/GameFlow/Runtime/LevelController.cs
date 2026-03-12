@@ -8,9 +8,8 @@ namespace Game.GameFlow
 {
     internal class LevelController : MonoBehaviour
     {
-        private LevelConfig _levelConfig;
         private Player _player;
-        private Dictionary<EnemyConfig, EnemySpawner> _enemySpawners;
+        private List<EnemySpawner> _enemySpawners;
         private Spawner<Food> _foodSpawner;
         
         private bool _isRunning;
@@ -19,28 +18,18 @@ namespace Game.GameFlow
         public event Action Lost;
 
         [Inject]
-        private void Construct(LevelConfig config, Player player)
+        private void Construct(Player player)
         {
-            _levelConfig = config ?? throw new ArgumentNullException(nameof(config));
             _player = player ?? throw new ArgumentNullException(nameof(player));
         }
         
-        internal void Initialize(Dictionary<EnemyConfig, EnemySpawner> enemySpawners, Spawner<Food> foodSpawner)
+        internal void Initialize(List<EnemySpawner> enemySpawners, Spawner<Food> foodSpawner)
         {
             if (enemySpawners == null)
                 throw new ArgumentNullException(nameof(enemySpawners));
 
             if (enemySpawners.Count == 0)
                 throw new ArgumentException("Enemy spawners collection is empty.", nameof(enemySpawners));
-
-            foreach (var pair in enemySpawners)
-            {
-                if (pair.Key == null)
-                    throw new ArgumentException("Enemy config key is null.", nameof(enemySpawners));
-
-                if (pair.Value == null)
-                    throw new ArgumentException("Enemy spawner value is null.", nameof(enemySpawners));
-            }
 
             if (foodSpawner == null)
                 throw new ArgumentNullException(nameof(foodSpawner));
@@ -64,16 +53,18 @@ namespace Game.GameFlow
             
             Subscribe();
             
-            _foodSpawner.MaintainCount(_levelConfig.FoodSpawnData.Count);
-            
-            foreach (EnemySpawnData data in _levelConfig.EnemySpawnData)
-                _enemySpawners[data.Config].Spawn(data.Count);
+            _foodSpawner.MaintainTargetCount();
+
+            foreach (EnemySpawner enemySpawner in _enemySpawners)
+                enemySpawner.SpawnTargetCount();
         }
         
         private void Subscribe()
         {
-            _player.SizeChanged += OnPlayerSizeChanged;
             _player.Absorbed += OnPlayerAbsorbed;
+            
+            foreach (EnemySpawner enemySpawner in _enemySpawners)
+                enemySpawner.ActiveCountDecreased += OnActiveEnemyCountDecreased;
         }
 
         internal void StopLevel()
@@ -87,29 +78,16 @@ namespace Game.GameFlow
             
             _foodSpawner.StopSpawn();
             
-            foreach (var enemySpawner  in _enemySpawners)
-                enemySpawner.Value.StopSpawn();
+            foreach (EnemySpawner enemySpawner  in _enemySpawners)
+                enemySpawner.StopSpawn();
         }
 
         private void Unsubscribe()
         {
-            _player.SizeChanged -= OnPlayerSizeChanged;
             _player.Absorbed -= OnPlayerAbsorbed;
-        }
-        
-        private void OnPlayerSizeChanged(int size)
-        {
-            if (!_isRunning)
-                return;
-            
-            //Debug.Log(size);
-            //поменять нужно будет, на что все противники поглощены на уровне
 
-            if (size >= _levelConfig.PlayerWinSize)
-            {
-                StopLevel();
-                Won?.Invoke();
-            }
+            foreach (EnemySpawner enemySpawner in _enemySpawners)
+                enemySpawner.ActiveCountDecreased -= OnActiveEnemyCountDecreased;
         }
         
         private void OnPlayerAbsorbed(IAbsorbable absorbable)
@@ -119,6 +97,29 @@ namespace Game.GameFlow
 
             StopLevel();
             Lost?.Invoke();
+        }
+
+        private void OnActiveEnemyCountDecreased()
+        {
+            if (!_isRunning)
+                return;
+
+            if (AreAllEnemiesAbsorbed())
+            {
+                StopLevel();
+                Won?.Invoke();
+            }
+        }
+        
+        private bool AreAllEnemiesAbsorbed()
+        {
+            foreach (EnemySpawner enemySpawner in _enemySpawners)
+            {
+                if (enemySpawner.ActiveCount > 0)
+                    return false;
+            }
+            
+            return true;
         }
     }
 }
