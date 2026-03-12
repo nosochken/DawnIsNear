@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 using Zenject;
 
@@ -16,7 +17,10 @@ namespace Game.Gameplay
         [Inject]
         private void Construct(PlayerConfig config, PlayField playField)
         {
-            _playField = playField;
+            if (config == null)
+                throw new ArgumentNullException(nameof(config));
+            
+            _playField = playField ?? throw new ArgumentNullException(nameof(playField));
             
             Initialize(config.MovementSpeed, config.Size.MinSize);
             _maxDistance = config.DistanceData.MaxDistance;

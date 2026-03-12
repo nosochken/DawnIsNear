@@ -1,23 +1,26 @@
+using System;
 using UnityEngine;
 
 namespace Game.Gameplay
 {
     [CreateAssetMenu(menuName = "Configs/Enemy", fileName = "EnemyConfig")]
-    public class EnemyConfig : EntityConfigs
+    public class EnemyConfig : EntityConfig
     {
         [SerializeField] private Enemy _prefab;
-        [SerializeField] private EnemyBrainData _bainData;
+        [SerializeField] private EnemyBrainData _brainData;
         
         public Enemy Prefab => _prefab;
-        public EnemyBrainData BrainData => _bainData;
-        
-        //[Header("Слизевой след (если нужен этому врагу)")]
-        //public bool SlimeTrailEnabled;
+        public EnemyBrainData BrainData => _brainData;
 
-        //[Min(0f)] public float SlimeIntervalSeconds = 0.4f;
-        //[Min(0f)] public float SlimeLifeSeconds = 6f;
+        protected override void ValidateAdditional()
+        {
+            if (_prefab == null)
+                throw new ArgumentNullException(nameof(_prefab));
 
-        // потом добавишь сюда поля под рывок, шипы, плевок и т.д.
-        // и будешь использовать их только в тех врагах, кому они нужны.
+            if (_brainData == null)
+                throw new ArgumentNullException(nameof(_brainData));
+
+            _brainData.Validate();
+        }
     }
 }

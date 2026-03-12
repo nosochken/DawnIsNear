@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 
 namespace Game.Input
@@ -9,6 +10,9 @@ namespace Game.Input
         private void Awake()
         {
             _camera = Camera.main;
+
+            if (_camera == null)
+                throw new InvalidOperationException("Main Camera is not found.");
         }
 
         public Vector2 Convert(Vector3 screenPosition)

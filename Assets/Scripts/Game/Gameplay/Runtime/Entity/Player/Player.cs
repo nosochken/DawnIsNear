@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 using Game.Input;
 using Zenject;
@@ -15,6 +16,9 @@ namespace Game.Gameplay
         [Inject]
         private void Construct(PlayerConfig config)
         {
+            if (config == null)
+                throw new ArgumentNullException(nameof(config));
+            
             InitializeBase(config.Size);
         }
         

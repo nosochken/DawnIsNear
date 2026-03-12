@@ -22,7 +22,7 @@ MonoBehaviour:
     _minSpeedFactorLimit: 0.3
     _sizeInfluenceOnSpeed: 1.1
   _prefab: {fileID: 2609389921354987954, guid: c670005a1cf544c8cb1ca0cad1344810, type: 3}
-  _bainData:
+  _brainData:
     _dangerRadius: 8
     _absorbRadius: 10
     _absorbableWeight: 3
@@ -39,6 +39,6 @@ MonoBehaviour:
     _sqrDistanceEpsilon: 0.25
     _directionChangeRate: 10
     _boundaryWeight: 1.5
-    _BoundaryAvoidDistance: 1.2
+    _boundaryAvoidDistance: 1.2
     _boundaryThreshold: 0.05
     _boundaryDistanceEpsilon: 0.02

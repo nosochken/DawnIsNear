@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 
 namespace Game.Gameplay
@@ -15,6 +16,12 @@ namespace Game.Gameplay
         internal BoundarySteering(CapsuleCollider2D collider, PlayField playField,
             float avoidDistance, float epsilon, float boundaryThreshold)
         {
+            if (collider == null)
+                throw new ArgumentNullException(nameof(collider));
+            
+            if (playField == null)
+                throw new ArgumentNullException(nameof(playField));
+            
             _boundary = new MovementBoundary(collider, playField);
 
             _avoidDistance = avoidDistance;

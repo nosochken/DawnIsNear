@@ -1,3 +1,4 @@
+using System;
 using Game.Gameplay;
 using UnityEngine;
 using Zenject;
@@ -13,13 +14,16 @@ namespace Game.Presentation
         [Inject]
         private void Construct(ITargetable  target, PlayField playField)
         {
-            _target = target;
-            _playField = playField;
+            _target = target ?? throw new ArgumentNullException(nameof(target));
+            _playField = playField ?? throw new ArgumentNullException(nameof(playField));
         }
 
         private void Awake()
         {
             _camera = Camera.main;
+            
+            if (_camera == null)
+                throw new InvalidOperationException("Main Camera is not found.");
         }
 
         private void LateUpdate()

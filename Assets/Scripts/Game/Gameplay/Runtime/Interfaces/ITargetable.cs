@@ -1,6 +1,10 @@
 using UnityEngine;
 
-public interface ITargetable
+namespace Game.Gameplay
 {
-    public Vector2 CurrentPosition { get; }
+    public interface ITargetable
+    {
+        public Vector2 CurrentPosition { get; }
+    }
+
 }

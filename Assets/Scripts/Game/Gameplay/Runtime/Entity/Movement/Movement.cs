@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 
 namespace Game.Gameplay
@@ -21,6 +22,12 @@ namespace Game.Gameplay
         
         internal void Initialize(MovementSpeedData speedData, int minSize)
         {
+            if (speedData == null)
+                throw new ArgumentNullException(nameof(speedData));
+
+            if (minSize <= 0)
+                throw new ArgumentOutOfRangeException(nameof(minSize));
+            
             _minSize = minSize;
             _maxSpeed = speedData.MaxSpeed;
             

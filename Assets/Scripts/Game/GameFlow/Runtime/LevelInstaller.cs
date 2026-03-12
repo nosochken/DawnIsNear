@@ -15,6 +15,23 @@ namespace Game.GameFlow
 
         public override void InstallBindings()
         {
+            if (_levelConfig == null)
+                throw new System.ArgumentNullException(nameof(_levelConfig));
+
+            if (_levelController == null)
+                throw new System.ArgumentNullException(nameof(_levelController));
+
+            if (_enemySpawnerPrefab == null)
+                throw new System.ArgumentNullException(nameof(_enemySpawnerPrefab));
+
+            if (_foodSpawnerPrefab == null)
+                throw new System.ArgumentNullException(nameof(_foodSpawnerPrefab));
+
+            if (_playField == null)
+                throw new System.ArgumentNullException(nameof(_playField));
+            
+            _levelConfig.Validate();
+            
             Container.Bind<LevelConfig>().FromInstance(_levelConfig).AsSingle();
             
             Container.Bind<PlayerConfig>().FromInstance(_levelConfig.PlayerConfig).AsSingle();
@@ -29,7 +46,7 @@ namespace Game.GameFlow
             Dictionary<EnemyConfig, EnemySpawner> enemySpawners = ConstructEnemySpawners();
 
             Spawner<Food> foodSpawner = Container.InstantiatePrefabForComponent<FoodSpawner>(_foodSpawnerPrefab);
-            foodSpawner.Initialize(_levelConfig.Food.Prefab, _levelConfig.Food.Count);
+            foodSpawner.Initialize(_levelConfig.FoodSpawnData.Prefab, _levelConfig.FoodSpawnData.Count);
             
             _levelController.Initialize(enemySpawners, foodSpawner);
 
@@ -40,7 +57,7 @@ namespace Game.GameFlow
         {
             Dictionary<EnemyConfig, EnemySpawner> enemySpawners = new Dictionary<EnemyConfig, EnemySpawner>();
             
-            foreach (EnemySpawnData data in _levelConfig.Enemies)
+            foreach (EnemySpawnData data in _levelConfig.EnemySpawnData)
             {
                 EnemySpawner enemySpawner = Container.InstantiatePrefabForComponent<EnemySpawner>(_enemySpawnerPrefab);
                 enemySpawner.Initialize(data.Config.Prefab, data.Count);

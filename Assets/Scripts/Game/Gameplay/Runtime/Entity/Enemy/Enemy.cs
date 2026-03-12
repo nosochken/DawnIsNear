@@ -1,12 +1,14 @@
 using System;
 using UnityEngine;
+using Zenject;
 
 namespace Game.Gameplay
 {
-    [RequireComponent(typeof(EnemyBrain), typeof(EnemyMovement))]
+    [RequireComponent(typeof(CapsuleCollider2D),typeof(EnemyBrain), typeof(EnemyMovement))]
     public class Enemy : Absorber, ISpawnable<Enemy>
     {
         private CapsuleCollider2D _collider;
+        private EnemyConfig _config;
         private EnemyBrain _brain;
         private EnemyMovement _movement;
         
@@ -14,11 +16,12 @@ namespace Game.Gameplay
         
         public event Action<Enemy> ReadyToSpawn;
 
+        [Inject]
         internal void Initialize(EnemyConfig config)
         {
-            InitializeBase(config.Size);
-            _brain.Initialize(transform, _collider, config.BrainData);
-            _movement.Initialize(config.MovementSpeed, Size);
+            _config = config ?? throw new ArgumentNullException(nameof(config));
+            
+            InitializeBase(_config.Size);
         }
         
         protected override void GetComponents()
@@ -28,11 +31,17 @@ namespace Game.Gameplay
             _brain = GetComponent<EnemyBrain>();
             _movement = GetComponent<EnemyMovement>();
         }
-        
+
         protected override void Subscribe()
         {
             base.Subscribe();
             Absorbed += OnAbsorbed;
+        }
+        
+        private void Start()
+        {
+            _brain.Initialize(transform, _collider, _config.BrainData);
+            _movement.Initialize(_config.MovementSpeed, MinSize);
         }
 
         private void Update()
@@ -49,11 +58,6 @@ namespace Game.Gameplay
         {
             base.Unsubscribe();
             Absorbed -= OnAbsorbed;
-        }
-        
-        public void SetTargetDirection(Vector2 targetDirection)
-        {
-            _targetDirection = targetDirection;
         }
 
         private void OnAbsorbed(IAbsorbable absorbable)

@@ -21,12 +21,30 @@ namespace Game.GameFlow
         [Inject]
         private void Construct(LevelConfig config, Player player)
         {
-            _levelConfig = config;
-            _player = player;
+            _levelConfig = config ?? throw new ArgumentNullException(nameof(config));
+            _player = player ?? throw new ArgumentNullException(nameof(player));
         }
         
         internal void Initialize(Dictionary<EnemyConfig, EnemySpawner> enemySpawners, Spawner<Food> foodSpawner)
         {
+            if (enemySpawners == null)
+                throw new ArgumentNullException(nameof(enemySpawners));
+
+            if (enemySpawners.Count == 0)
+                throw new ArgumentException("Enemy spawners collection is empty.", nameof(enemySpawners));
+
+            foreach (var pair in enemySpawners)
+            {
+                if (pair.Key == null)
+                    throw new ArgumentException("Enemy config key is null.", nameof(enemySpawners));
+
+                if (pair.Value == null)
+                    throw new ArgumentException("Enemy spawner value is null.", nameof(enemySpawners));
+            }
+
+            if (foodSpawner == null)
+                throw new ArgumentNullException(nameof(foodSpawner));
+
             _enemySpawners = enemySpawners;
             _foodSpawner = foodSpawner;
         }
@@ -36,13 +54,19 @@ namespace Game.GameFlow
             if (_isRunning)
                 return;
             
+            if (_enemySpawners == null)
+                throw new InvalidOperationException("LevelController is not initialized.");
+
+            if (_foodSpawner == null)
+                throw new InvalidOperationException("LevelController is not initialized.");
+            
             _isRunning = true;
             
             Subscribe();
             
-            _foodSpawner.MaintainCount(_levelConfig.Food.Count);
+            _foodSpawner.MaintainCount(_levelConfig.FoodSpawnData.Count);
             
-            foreach (EnemySpawnData data in _levelConfig.Enemies)
+            foreach (EnemySpawnData data in _levelConfig.EnemySpawnData)
                 _enemySpawners[data.Config].Spawn(data.Count);
         }
         
@@ -78,7 +102,7 @@ namespace Game.GameFlow
             if (!_isRunning)
                 return;
             
-            Debug.Log(size);
+            //Debug.Log(size);
             //поменять нужно будет, на что все противники поглощены на уровне
 
             if (size >= _levelConfig.PlayerWinSize)

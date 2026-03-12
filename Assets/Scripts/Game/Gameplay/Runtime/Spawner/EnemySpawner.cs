@@ -1,3 +1,6 @@
+using System;
+using Zenject;
+
 namespace Game.Gameplay
 {
     public class EnemySpawner : Spawner<Enemy>
@@ -6,12 +9,12 @@ namespace Game.Gameplay
 
         public void InitializeEnemy(EnemyConfig config)
         {
-            _config = config;
+            _config = config ?? throw new ArgumentNullException(nameof(config));
         }
-
-        protected override void AdditionalCreationSettings(Enemy enemy)
+        
+        protected override Enemy CreateSpawnable(DiContainer container, Enemy prefab)
         {
-            enemy.Initialize(_config);
+            return container.InstantiatePrefabForComponent<Enemy>(prefab, new object[] { _config });
         }
     }
 }

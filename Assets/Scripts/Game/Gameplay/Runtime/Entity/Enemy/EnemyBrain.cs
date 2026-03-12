@@ -1,9 +1,9 @@
+using System;
 using UnityEngine;
 using Zenject;
 
 namespace Game.Gameplay
 {
-    [RequireComponent(typeof(Enemy))]
     internal class EnemyBrain : MonoBehaviour
     {
         private IAbsorbable _mainTarget;
@@ -29,15 +29,31 @@ namespace Game.Gameplay
         [Inject]
         private void Construct(ITargetable mainTarget, PlayField playField)
         {
-            _mainTarget = (IAbsorbable)mainTarget;
-            _playField = playField;
+            if (mainTarget == null)
+                throw new ArgumentNullException(nameof(mainTarget));
+            
+            if (mainTarget is not IAbsorbable absorbable) 
+                throw new ArgumentException($"{nameof(mainTarget)} is not {nameof(IAbsorbable)}.");
+            
+            _mainTarget = absorbable;
+            _playField = playField ?? throw new ArgumentNullException(nameof(playField));;
         }
 
         internal void Initialize(Transform selfTransform, CapsuleCollider2D collider, EnemyBrainData data)
         {
+            if (selfTransform == null)
+                throw new ArgumentNullException(nameof(selfTransform));
+            
+            if (collider == null)
+                throw new ArgumentNullException(nameof(collider));
+            
+            if (data == null)
+                throw new ArgumentNullException(nameof(data));
+            
             float scannerRadius = Mathf.Max(data.DangerRadius, data.AbsorbRadius);
+            
             _spaceScanner.Initialize(selfTransform, scannerRadius);
-
+            
             _absorbableWeight = data.AbsorbableWeight;
             _preyWeight =  data.PreyWeight;
             _threatWeightMin = data.ThreatWeightMin; 
@@ -64,6 +80,9 @@ namespace Game.Gameplay
         private void Awake()
         {
             _spaceScanner = GetComponentInChildren<EnemySpaceScanner>();
+            
+            if (_spaceScanner == null)
+                throw new InvalidOperationException("EnemySpaceScanner is not found.");
         }
 
         internal Vector2 GetBestTarget(Vector2 position, int size)

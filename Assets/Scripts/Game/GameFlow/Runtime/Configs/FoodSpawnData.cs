@@ -12,5 +12,14 @@ namespace Game.GameFlow
         
         public Food Prefab => _prefab;
         public int Count => _count;
+        
+        public void Validate()
+        {
+            if (_prefab == null)
+                throw new ArgumentNullException(nameof(_prefab));
+
+            if (_count <= 0)
+                throw new ArgumentOutOfRangeException(nameof(_count));
+        }
     }
 }

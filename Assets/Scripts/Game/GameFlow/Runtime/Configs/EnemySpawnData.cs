@@ -12,5 +12,16 @@ namespace Game.GameFlow
         
         public EnemyConfig Config => _config;
         public int Count => _count;
+        
+        public void Validate()
+        {
+            if (_config == null)
+                throw new ArgumentNullException(nameof(_config));
+
+            if (_count <= 0)
+                throw new ArgumentOutOfRangeException(nameof(_count));
+
+            _config.Validate();
+        }
     }
 }

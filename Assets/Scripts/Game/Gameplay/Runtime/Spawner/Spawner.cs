@@ -25,14 +25,20 @@ namespace Game.Gameplay
         [Inject]
         private void Construct(DiContainer container, PlayField playField)
         {
-            _container = container;
-            _playField = playField;
+            _container = container ?? throw new ArgumentNullException(nameof(container));
+            _playField = playField ?? throw new ArgumentNullException(nameof(playField));
         }
         
         public void Initialize(T prefab, int capacity)
         {
+            if (prefab == null)
+                throw new ArgumentNullException(nameof(prefab));
+
+            if (capacity <= 0)
+                throw new ArgumentOutOfRangeException(nameof(capacity));
+            
             _prefab = prefab;
-            _poolCapacity = Mathf.Max(0, capacity);
+            _poolCapacity = capacity;
             _poolMaxSize = _poolCapacity;
 
             _pool = new ObjectPool<T>(
@@ -52,6 +58,9 @@ namespace Game.Gameplay
 
         public void Spawn(int count)
         {
+            if (_pool == null)
+                throw new InvalidOperationException("Spawner is not initialized.");
+            
             if (count <= 0)
                 throw new ArgumentOutOfRangeException(nameof(count));
 
@@ -61,6 +70,9 @@ namespace Game.Gameplay
 
         public void MaintainCount(int count)
         {
+            if (_pool == null)
+                throw new InvalidOperationException("Spawner is not initialized.");
+            
             if (count <= 0)
                 throw new ArgumentOutOfRangeException(nameof(count));
 
@@ -79,14 +91,13 @@ namespace Game.Gameplay
 
         private T Create()
         {
-            T spawnable = _container.InstantiatePrefabForComponent<T>(_prefab);
-            spawnable.gameObject.SetActive(false);
-            AdditionalCreationSettings(spawnable);
-
-            return spawnable;
+            return CreateSpawnable(_container, _prefab);
         }
-        
-        protected virtual void AdditionalCreationSettings(T spawnable) { }
+
+        protected virtual T CreateSpawnable(DiContainer container, T prefab)
+        {
+            return container.InstantiatePrefabForComponent<T>(prefab);
+        }
 
         private void ActOnGet(T spawnable)
         {

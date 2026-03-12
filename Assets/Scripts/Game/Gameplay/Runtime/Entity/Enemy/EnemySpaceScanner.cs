@@ -20,7 +20,11 @@ namespace Game.Gameplay
         
         internal void Initialize(Transform ownerTransform, float scannerRadius)
         {
-            _ownerTransform = ownerTransform;
+            _ownerTransform = ownerTransform ?? throw new ArgumentNullException(nameof(ownerTransform));
+            
+            if (scannerRadius <= 0f)
+                throw new ArgumentOutOfRangeException(nameof(scannerRadius));
+            
             _collider.radius = scannerRadius;
         }
 

@@ -24,7 +24,11 @@ namespace Game.Gameplay
         
         protected void InitializeBase(SizeData data)
         {
+            if (data == null)
+                throw new ArgumentNullException(nameof(data));
+            
             MinSize = data.MinSize;
+            Size = MinSize;
             //_maxSize = config.Size.MaxSize;
             
             _absorbOverTimeInterval = data.DelayInDecrease;
@@ -40,9 +44,12 @@ namespace Game.Gameplay
 
         private void OnEnable()
         {
+            if (MinSize <= 0)
+                throw new ArgumentOutOfRangeException(nameof(MinSize));
+            
             _absorbableDetector.Detected +=  OnDetected;
             Subscribe();
-
+            
             Size = MinSize;
             SizeChanged?.Invoke(Size);
             
@@ -69,6 +76,7 @@ namespace Game.Gameplay
 
         public void BeAbsorbed()
         {
+            SizeChanged?.Invoke(Size);
             Absorbed?.Invoke(this);
         }
         
@@ -83,10 +91,13 @@ namespace Game.Gameplay
                 Size--;
 
                 if (Size <= 0)
+                {
                     BeAbsorbed();
-                    
-                else
-                    SizeChanged?.Invoke(Size);
+                    _beAbsorbedCoroutine = null;
+                    yield break;
+                }
+            
+                SizeChanged?.Invoke(Size);
             }
         }
         

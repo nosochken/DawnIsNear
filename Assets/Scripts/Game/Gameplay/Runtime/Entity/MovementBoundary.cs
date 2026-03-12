@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 
 namespace Game.Gameplay
@@ -9,8 +10,8 @@ namespace Game.Gameplay
         
         internal MovementBoundary(CapsuleCollider2D  collider, PlayField playField)
         {
-            _collider = collider;
-            _playField = playField;
+            _collider = collider ?? throw new ArgumentNullException(nameof(collider));
+            _playField = playField ?? throw new ArgumentNullException(nameof(playField));
         }
 
         internal void BlockOutboundAxes(ref Vector2 direction, Vector2 position, float threshold = 0f)

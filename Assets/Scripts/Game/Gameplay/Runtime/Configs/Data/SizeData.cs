@@ -15,5 +15,20 @@ namespace Game.Gameplay
         public int MaxSize => _maxSize;
         
         public float DelayInDecrease => _delayInDecrease;
+        
+        public void Validate()
+        {
+            if (_minSize <= 0)
+                throw new ArgumentOutOfRangeException(nameof(_minSize));
+            
+            if (_maxSize <= 0)
+                throw new ArgumentOutOfRangeException(nameof(_maxSize));
+            
+            if (_maxSize < _minSize)
+                throw new ArgumentException($"{nameof(_maxSize)} must be greater than or equal to {nameof(_minSize)}");
+            
+            if (_delayInDecrease <= 0f)
+                throw new ArgumentOutOfRangeException(nameof(_delayInDecrease));
+        }
     }
 }
