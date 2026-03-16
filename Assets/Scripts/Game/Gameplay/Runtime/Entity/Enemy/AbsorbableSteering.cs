@@ -21,9 +21,9 @@ namespace Game.Gameplay
 
             foreach (IAbsorbable absorbable in absorbables)
             {
-                if (absorbable == null || !absorbable.IsActive) continue;
+                if (absorbable == null || !absorbable.Owner.IsActive) continue;
 
-                Vector2 toAbsorbable = absorbable.CurrentPosition - selfPosition;
+                Vector2 toAbsorbable = absorbable.Owner.CurrentPosition - selfPosition;
                 float sqrAbsorbableDistance = toAbsorbable.sqrMagnitude;
                 
                 if (sqrAbsorbableDistance < DirectionMath.MinSqrMagnitudeForDirection || sqrAbsorbableDistance > absorbableRadiusSqr) continue;

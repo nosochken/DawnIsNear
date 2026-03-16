@@ -7,7 +7,7 @@ namespace Game.Gameplay
 {
     [RequireComponent(typeof(PlayerInputController), typeof(ScreenToWorld), typeof(PlayerMovement))]
 
-    public class Player : Absorber
+    public class Player : Unit
     {
         private PlayerInputController _input;
         private ScreenToWorld _screenToWorld;
@@ -19,7 +19,7 @@ namespace Game.Gameplay
             if (config == null)
                 throw new ArgumentNullException(nameof(config));
             
-            InitializeBase(config.Size);
+            Initialize(config.Size);
         }
         
         protected override void GetComponents()
@@ -34,7 +34,7 @@ namespace Game.Gameplay
         private void FixedUpdate()
         {
             Vector2 targetPosition = _screenToWorld.Convert(_input.PointerScreenPosition);
-            _movement.MoveTo(targetPosition, Size);
+            _movement.MoveTo(targetPosition, Size.Current);
         }
     }
 }
