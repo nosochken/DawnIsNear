@@ -28,10 +28,10 @@ namespace Game.Gameplay
 
             foreach (IAbsorber threat in absorbers)
             {
-                if (threat == null || !threat.IsActive) continue;
-                if (threat.Size <= selfSize) continue;
+                if (threat == null || !threat.Owner.IsActive) continue;
+                if (threat.Owner.CurrentSize <= selfSize) continue;
 
-                Vector2 away = selfPosition - threat.CurrentPosition;
+                Vector2 away = selfPosition - threat.Owner.CurrentPosition;
                 float sqrAwayDistance = away.sqrMagnitude;
                 if (sqrAwayDistance < DirectionMath.MinSqrMagnitudeForDirection || sqrAwayDistance > dangerRadiusSqr) continue;
 
@@ -43,7 +43,7 @@ namespace Game.Gameplay
 
                 float distanceWeight = 1f / (sqrAwayDistance + _epsilon);
 
-                float sizeRatio = (threat.Size - selfSize) / (float)Mathf.Max(selfSize, 1);
+                float sizeRatio = (threat.Owner.CurrentSize - selfSize) / (float)Mathf.Max(selfSize, 1);
                 float sizeBoost = Mathf.Lerp(_minBoost, _maxThreatRepulsionBoost, Mathf.Clamp01(sizeRatio));
 
                 sum += away.normalized * distanceWeight * sizeBoost;

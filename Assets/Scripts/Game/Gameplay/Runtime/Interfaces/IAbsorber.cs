@@ -1,8 +1,7 @@
 namespace Game.Gameplay
 {
-    internal interface IAbsorber : ITargetable
+    internal interface IAbsorber
     {
-        public int Size { get; }
-        public bool IsActive { get; }
+        public ITargetable Owner { get; }
     }
 }

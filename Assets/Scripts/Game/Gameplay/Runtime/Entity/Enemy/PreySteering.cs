@@ -30,24 +30,24 @@ namespace Game.Gameplay
 
             foreach (IAbsorber prey in absorbers)
             {
-                if (prey == null || !prey.IsActive) continue;
-                if (prey.Size >= selfSize) continue;
+                if (prey == null || !prey.Owner.IsActive) continue;
+                if (prey.Owner.CurrentSize >= selfSize) continue;
 
-                Vector2 toPrey = prey.CurrentPosition - selfPosition;
+                Vector2 toPrey = prey.Owner.CurrentPosition - selfPosition;
                 float sqrPreyDistance = toPrey.sqrMagnitude;
                 if (sqrPreyDistance < DirectionMath.MinSqrMagnitudeForDirection || sqrPreyDistance > preyRadiusSqr) continue;
 
                 float distanceWeight = 1f / (sqrPreyDistance + _epsilon);
 
-                float sizeRatio = (selfSize - prey.Size) / (float)Mathf.Max(selfSize, 1);
+                float sizeRatio = (selfSize - prey.Owner.CurrentSize) / (float)Mathf.Max(selfSize, 1);
                 float weightBoost = Mathf.Lerp(_minBoost, _maxPreyAttractionBoost, Mathf.Clamp01(sizeRatio));
                 
                 sum += toPrey.normalized * distanceWeight * weightBoost;
             }
             
-            if (mainTarget != null && mainTarget.IsActive && selfSize > mainTarget.Size)
+            if (mainTarget != null && mainTarget.Owner.IsActive && selfSize > mainTarget.Owner.CurrentSize)
             {
-                Vector2 toMainTarget = mainTarget.CurrentPosition - selfPosition;
+                Vector2 toMainTarget = mainTarget.Owner.CurrentPosition - selfPosition;
                 
                 if (toMainTarget.sqrMagnitude > DirectionMath.MinSqrMagnitudeForDirection)
                     sum += toMainTarget.normalized * _mainTargetHuntBias;

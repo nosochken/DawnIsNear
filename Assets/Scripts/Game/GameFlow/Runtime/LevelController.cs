@@ -61,7 +61,7 @@ namespace Game.GameFlow
         
         private void Subscribe()
         {
-            _player.Absorbed += OnPlayerAbsorbed;
+            _player.Absorbable.Absorbed += OnPlayerAbsorbed;
             
             foreach (EnemySpawner enemySpawner in _enemySpawners)
                 enemySpawner.ActiveCountDecreased += OnActiveEnemyCountDecreased;
@@ -84,7 +84,7 @@ namespace Game.GameFlow
 
         private void Unsubscribe()
         {
-            _player.Absorbed -= OnPlayerAbsorbed;
+            _player.Absorbable.Absorbed -= OnPlayerAbsorbed;
 
             foreach (EnemySpawner enemySpawner in _enemySpawners)
                 enemySpawner.ActiveCountDecreased -= OnActiveEnemyCountDecreased;
