@@ -15,12 +15,6 @@ namespace Game.Gameplay
             SetMin();
         }
 
-        internal void SetMin()
-        {
-            Current = Min;
-            SizeChanged?.Invoke(Current);
-        }
-
         internal void Increase(int value)
         {
             Current += value;
@@ -30,6 +24,19 @@ namespace Game.Gameplay
         internal void Decrease(int value)
         {
             Current -= value;
+            SizeChanged?.Invoke(Current);
+        }
+
+        internal void DecreaseToZero()
+        {
+            Current = 0;
+            SizeChanged?.Invoke(Current);
+        }
+        
+        
+        private void SetMin()
+        {
+            Current = Min;
             SizeChanged?.Invoke(Current);
         }
     }

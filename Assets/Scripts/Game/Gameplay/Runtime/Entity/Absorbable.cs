@@ -4,43 +4,66 @@ using UnityEngine;
 
 namespace Game.Gameplay
 {
-    public class Absorbable : IAbsorbable
+    public class Absorbable : MonoBehaviour, IAbsorbable
     {
-        private Unit _unit;
-        
         private float _absorbOverTimeInterval;
-        
-        internal Absorbable(Unit unit, float absorbOverTimeInterval)
-        {
-            _unit = unit;
-            _absorbOverTimeInterval = absorbOverTimeInterval;
-        }
+        private Coroutine _beAbsorbedCoroutine;
         
         public event Action<IAbsorbable> Absorbed;
         
-        public ITargetable Owner => _unit;
+        public Body Body { get; private set; }
 
-        public void BeAbsorbed()
+        internal void InitializeBase(int minSize, float delayInDecrease)
         {
-            Absorbed?.Invoke(this);
+            if (minSize <= 0f)
+                throw new ArgumentOutOfRangeException(nameof(minSize));
+            
+            Body = new Body(minSize, transform, this);
+            
+            if (delayInDecrease <= 0f)
+                throw new ArgumentOutOfRangeException(nameof(delayInDecrease));
+            
+            _absorbOverTimeInterval = delayInDecrease;
+        }
+
+        private void OnEnable()
+        {
+            if (_beAbsorbedCoroutine == null) 
+                _beAbsorbedCoroutine = StartCoroutine(BeAbsorbedOverTime());
+        }
+
+        private void OnDisable()
+        {
+            if (_beAbsorbedCoroutine != null)
+            {
+                StopCoroutine(_beAbsorbedCoroutine);
+                _beAbsorbedCoroutine = null;
+            }
         }
         
-        internal IEnumerator BeAbsorbedOverTime()
+        private IEnumerator BeAbsorbedOverTime()
         {
             WaitForSeconds wait = new WaitForSeconds(_absorbOverTimeInterval);
             
-            while (_unit.IsActive)
+            while (Body.IsActive)
             {
                 yield return wait;
 
-                _unit.Size.Decrease(1);
+                Body.Size.Decrease(1);
 
-                if (_unit.Size.Current <= 0)
+                if (Body.Size.Current <= 0)
                 {
                     BeAbsorbed();
+                    _beAbsorbedCoroutine = null;
                     yield break;
                 }
             }
+        }
+
+        public void BeAbsorbed()
+        {
+            Body.Size.DecreaseToZero();
+            Absorbed?.Invoke(this);
         }
     }
 }

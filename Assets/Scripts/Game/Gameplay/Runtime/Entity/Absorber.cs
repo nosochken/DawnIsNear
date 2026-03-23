@@ -1,36 +1,46 @@
+using System;
+using UnityEngine;
+
 namespace Game.Gameplay
 {
-    public class Absorber : IAbsorber
+    [RequireComponent(typeof(AbsorbableDetector))]
+    public class Absorber : MonoBehaviour
     {
         private Unit _unit;
+        private AbsorbableDetector _absorbableDetector;
 
-        public Absorber(Unit unit)
+        internal void Initialize(Unit unit)
         {
-            _unit = unit;
+            _unit = unit ?? throw new ArgumentNullException(nameof(unit));
+            
+            _absorbableDetector = GetComponent<AbsorbableDetector>();
         }
         
-        public ITargetable Owner => _unit;
-
-        internal void Subscribe()
+        private void Awake()
         {
-            _unit.AbsorbableDetector.Detected +=  OnDetected;
+            _absorbableDetector = GetComponent<AbsorbableDetector>();
         }
 
-        internal void Unsubscribe()
+        private void OnEnable()
         {
-            _unit.AbsorbableDetector.Detected -=  OnDetected;
+            _absorbableDetector.Detected +=  OnDetected;
         }
-        
-        private void OnDetected(IAbsorbable absorbable)
+
+        private void OnDisable()
         {
-            if (absorbable.Owner.CurrentSize <= Owner.CurrentSize)
-                Absorb(absorbable);
+            _absorbableDetector.Detected -=  OnDetected;
         }
         
         private void Absorb(IAbsorbable absorbable)
         {
-            _unit.Size.Increase(absorbable.Owner.CurrentSize);
+            _unit.Body.Size.Increase(absorbable.Body.Size.Current);
             absorbable.BeAbsorbed();
+        }
+        
+        private void OnDetected(IAbsorbable absorbable)
+        {
+            if (absorbable.Body.Size.Current <= _unit.Body.Size.Current)
+                Absorb(absorbable);
         }
     }
 }
