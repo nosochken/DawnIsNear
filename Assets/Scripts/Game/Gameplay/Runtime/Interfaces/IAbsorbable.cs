@@ -1,13 +1,11 @@
-using System;
+using UnityEngine;
 
 namespace Game.Gameplay
 {
     public interface IAbsorbable
     {
-        public event Action<IAbsorbable> Absorbed;
-        
-        public ITargetable Owner { get; }
-        
-        public void BeAbsorbed();
+        public bool IsActive { get; }
+        public int CurrentSize { get; }
+        public Vector2 CurrentPosition { get; }
     }
 }

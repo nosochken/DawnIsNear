@@ -21,7 +21,7 @@ namespace Game.Gameplay
         {
             _config = config ?? throw new ArgumentNullException(nameof(config));
             
-            Initialize(_config.Size);
+            InitializeBase(_config.Size);
         }
         
         protected override void GetComponents()

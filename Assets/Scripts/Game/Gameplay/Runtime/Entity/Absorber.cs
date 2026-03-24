@@ -6,13 +6,16 @@ namespace Game.Gameplay
     [RequireComponent(typeof(AbsorbableDetector))]
     public class Absorber : MonoBehaviour
     {
-        private Unit _unit;
+        private Size _size;
         private AbsorbableDetector _absorbableDetector;
+        
+        public bool IsActive => isActiveAndEnabled;
+        public int CurrentSize => _size.Current;
+        public Vector2 CurrentPosition => transform.position;
 
-        internal void Initialize(Unit unit)
+        internal void Initialize(Size size)
         {
-            _unit = unit ?? throw new ArgumentNullException(nameof(unit));
-            
+            _size = size ?? throw new ArgumentNullException(nameof(size));
             _absorbableDetector = GetComponent<AbsorbableDetector>();
         }
         
@@ -33,13 +36,13 @@ namespace Game.Gameplay
         
         private void Absorb(IAbsorbable absorbable)
         {
-            _unit.Body.Size.Increase(absorbable.Body.Size.Current);
+            _size.Increase(absorbable.CurrentSize);
             absorbable.BeAbsorbed();
         }
         
         private void OnDetected(IAbsorbable absorbable)
         {
-            if (absorbable.Body.Size.Current <= _unit.Body.Size.Current)
+            if (absorbable.Body.Size.Current <= _size.Current)
                 Absorb(absorbable);
         }
     }

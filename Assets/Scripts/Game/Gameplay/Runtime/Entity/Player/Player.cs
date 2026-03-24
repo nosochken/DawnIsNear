@@ -19,7 +19,7 @@ namespace Game.Gameplay
             if (config == null)
                 throw new ArgumentNullException(nameof(config));
             
-            Initialize(config.Size);
+            InitializeBase(config.Size);
         }
         
         protected override void GetComponents()

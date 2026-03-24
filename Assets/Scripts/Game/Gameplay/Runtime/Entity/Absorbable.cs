@@ -6,14 +6,18 @@ namespace Game.Gameplay
 {
     public class Absorbable : MonoBehaviour, IAbsorbable
     {
+        private Size _size;
+        
         private float _absorbOverTimeInterval;
         private Coroutine _beAbsorbedCoroutine;
         
         public event Action<IAbsorbable> Absorbed;
         
-        public Body Body { get; private set; }
+        public bool IsActive => isActiveAndEnabled;
+        public int CurrentSize => _size.Current;
+        public Vector2 CurrentPosition => transform.position;
 
-        internal void InitializeBase(int minSize, float delayInDecrease)
+        internal void Initialize(Size size, float delayInDecrease)
         {
             if (minSize <= 0f)
                 throw new ArgumentOutOfRangeException(nameof(minSize));
