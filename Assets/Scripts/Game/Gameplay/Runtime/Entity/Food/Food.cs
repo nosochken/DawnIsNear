@@ -12,7 +12,7 @@ namespace Game.Gameplay
         public event Action<Food> ReadyToSpawn;
 
         public bool IsActive => isActiveAndEnabled;
-        public IValuableSize Size => _size;
+        public ISizeData Size => _size;
         public Vector2 CurrentPosition => transform.position;
 
         private void Awake()
