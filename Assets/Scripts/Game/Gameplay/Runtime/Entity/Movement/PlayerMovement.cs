@@ -1,13 +1,15 @@
 using System;
+using Game.Input;
 using UnityEngine;
 using Zenject;
 
 namespace Game.Gameplay
 {
-    [RequireComponent(typeof(CapsuleCollider2D))]
+    [RequireComponent(typeof(CapsuleCollider2D), typeof(ScreenToWorldConverter))]
     internal class PlayerMovement : Movement
     {
         private CapsuleCollider2D _collider;
+        private ScreenToWorldConverter _converter;
         private MovementBoundary _boundary;
         private PlayField _playField;
         
@@ -30,11 +32,14 @@ namespace Game.Gameplay
         protected override void GetComponents()
         {
             _collider = GetComponent<CapsuleCollider2D>();
+            _converter = GetComponent<ScreenToWorldConverter>();
             _boundary = new MovementBoundary(_collider, _playField);
         }
 
-        internal void MoveTo(Vector2 targetPosition, int size)
+        internal void MoveTo(Vector2 pointerScreenPosition, int size)
         {
+            Vector2 targetPosition = _converter.Convert(pointerScreenPosition);
+            
             Vector2 toTarget  =  targetPosition - Position;
             float distance = toTarget.magnitude;
 

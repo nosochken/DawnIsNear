@@ -1,8 +1,9 @@
+using System;
+
 namespace Game.Gameplay
 {
-    internal interface IAbsorber : ITargetable
+    public interface IAbsorber
     {
-        public int Size { get; }
-        public bool IsActive { get; }
+        public event Action<IAbsorber> BecameInactive;
     }
 }

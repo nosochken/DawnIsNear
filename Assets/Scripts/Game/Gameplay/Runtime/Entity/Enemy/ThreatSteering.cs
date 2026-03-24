@@ -19,17 +19,17 @@ namespace Game.Gameplay
             _epsilon = epsilon;
         }
         
-        internal Vector2 ComputeThreatRepulsion(out float panic, IReadOnlyCollection<IAbsorber> absorbers, 
+        internal Vector2 ComputeThreatRepulsion(out float panic, IReadOnlyCollection<ITargetable> absorbers, 
             Vector2 selfPosition, int selfSize)
         {
             float dangerRadiusSqr = _dangerRadius * _dangerRadius;
             Vector2 sum = Vector2.zero;
             float maxPanic = 0f;
 
-            foreach (IAbsorber threat in absorbers)
+            foreach (ITargetable threat in absorbers)
             {
                 if (threat == null || !threat.IsActive) continue;
-                if (threat.Size <= selfSize) continue;
+                if (threat.Size.Current <= selfSize) continue;
 
                 Vector2 away = selfPosition - threat.CurrentPosition;
                 float sqrAwayDistance = away.sqrMagnitude;
@@ -43,7 +43,7 @@ namespace Game.Gameplay
 
                 float distanceWeight = 1f / (sqrAwayDistance + _epsilon);
 
-                float sizeRatio = (threat.Size - selfSize) / (float)Mathf.Max(selfSize, 1);
+                float sizeRatio = (threat.Size.Current - selfSize) / (float)Mathf.Max(selfSize, 1);
                 float sizeBoost = Mathf.Lerp(_minBoost, _maxThreatRepulsionBoost, Mathf.Clamp01(sizeRatio));
 
                 sum += away.normalized * distanceWeight * sizeBoost;

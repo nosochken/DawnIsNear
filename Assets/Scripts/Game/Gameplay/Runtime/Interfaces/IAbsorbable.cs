@@ -2,12 +2,9 @@ using System;
 
 namespace Game.Gameplay
 {
-    public interface IAbsorbable : ITargetable
+    public interface IAbsorbable : IEventableAbsorbable
     {
-        public event Action<IAbsorbable> Absorbed;
-        
-        public int Size { get; }
-        public bool IsActive { get; }
+        public IValuableSize Size { get; }
 
         public void BeAbsorbed();
     }

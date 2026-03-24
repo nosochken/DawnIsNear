@@ -6,26 +6,26 @@ public class SizeDisplay : MonoBehaviour
 {
     private const float ScalePerSize = 0.3f;
 
-    private Absorber _absorber;
+    private Unit _unit;
 
     private void Awake()
     {
-        _absorber = GetComponent<Absorber>();
+        _unit = GetComponent<Unit>();
     }
 
     private void OnEnable()
     {
-        _absorber.SizeChanged += UpdateVisuals;
+        _unit.Resize.SizeChanged += UpdateVisuals;
     }
 
     private void OnDisable()
     {
-        _absorber.SizeChanged -= UpdateVisuals;
+        _unit.Resize.SizeChanged -= UpdateVisuals;
     }
 
     private void UpdateVisuals(int size)
     {
-        float scale = Mathf.Max(_absorber.MinSize + Mathf.Sqrt(size) * ScalePerSize, _absorber.MinSize);
+        float scale = Mathf.Max(_unit.Size.Min + Mathf.Sqrt(size) * ScalePerSize, _unit.Size.Min);
         transform.localScale = Vector3.one * scale;
     }
 }

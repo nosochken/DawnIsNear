@@ -5,7 +5,7 @@ using Zenject;
 namespace Game.Gameplay
 {
     [RequireComponent(typeof(CapsuleCollider2D),typeof(EnemyBrain), typeof(EnemyMovement))]
-    public class Enemy : Absorber, ISpawnable<Enemy>
+    public class Enemy : Unit, ISpawnable<Enemy>
     {
         private CapsuleCollider2D _collider;
         private EnemyConfig _config;
@@ -24,40 +24,37 @@ namespace Game.Gameplay
             InitializeBase(_config.Size);
         }
         
-        protected override void GetComponents()
+        private void Awake()
         {
-            base.GetComponents();
             _collider = GetComponent<CapsuleCollider2D>();
             _brain = GetComponent<EnemyBrain>();
             _movement = GetComponent<EnemyMovement>();
         }
 
-        protected override void Subscribe()
+        private void OnEnable()
         {
-            base.Subscribe();
-            Absorbed += OnAbsorbed;
+            Absorbable.Absorbed += OnAbsorbed;
         }
         
         private void Start()
         {
             _brain.Initialize(transform, _collider, _config.BrainData);
-            _movement.Initialize(_config.MovementSpeed, MinSize);
+            _movement.Initialize(_config.MovementSpeed, Size.Min);
         }
 
         private void Update()
         {
-            _targetDirection = _brain.GetBestTarget(CurrentPosition, Size);
+            _targetDirection = _brain.GetBestTarget(CurrentPosition, Size.Current);
         }
 
         private void FixedUpdate()
         {
-            _movement.MoveByDirection(_targetDirection, Size);
+            _movement.MoveByDirection(_targetDirection, Size.Current);
         }
 
-        protected override void Unsubscribe()
+        private void OnDisable()
         {
-            base.Unsubscribe();
-            Absorbed -= OnAbsorbed;
+            Absorbable.Absorbed -= OnAbsorbed;
         }
 
         private void OnAbsorbed(IAbsorbable absorbable)

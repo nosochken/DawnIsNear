@@ -6,7 +6,7 @@ namespace Game.Gameplay
 {
     internal class EnemyBrain : MonoBehaviour
     {
-        private IAbsorbable _mainTarget;
+        private ITargetable _mainTarget;
         private EnemySpaceScanner _spaceScanner;
         private PlayField _playField;
        
@@ -29,13 +29,7 @@ namespace Game.Gameplay
         [Inject]
         private void Construct(ITargetable mainTarget, PlayField playField)
         {
-            if (mainTarget == null)
-                throw new ArgumentNullException(nameof(mainTarget));
-            
-            if (mainTarget is not IAbsorbable absorbable) 
-                throw new ArgumentException($"{nameof(mainTarget)} is not {nameof(IAbsorbable)}.");
-            
-            _mainTarget = absorbable;
+            _mainTarget = mainTarget ?? throw new ArgumentNullException(nameof(mainTarget));
             _playField = playField ?? throw new ArgumentNullException(nameof(playField));;
         }
 

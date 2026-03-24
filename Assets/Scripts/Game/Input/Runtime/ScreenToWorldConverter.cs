@@ -3,7 +3,7 @@ using UnityEngine;
 
 namespace Game.Input
 {
-    public class ScreenToWorld : MonoBehaviour
+    public class ScreenToWorldConverter : MonoBehaviour
     {
         private Camera _camera;
         

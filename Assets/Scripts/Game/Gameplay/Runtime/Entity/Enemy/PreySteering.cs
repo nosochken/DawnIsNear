@@ -22,16 +22,16 @@ namespace Game.Gameplay
             _epsilon = epsilon;
         }
         
-        internal Vector2 ComputePreyAttraction(IReadOnlyCollection<IAbsorber> absorbers, IAbsorbable mainTarget, 
+        internal Vector2 ComputePreyAttraction(IReadOnlyCollection<ITargetable> absorbers, ITargetable mainTarget, 
             Vector2 selfPosition, int selfSize)
         {
             float preyRadiusSqr = _absorbRadius * _absorbRadius;
             Vector2 sum = Vector2.zero;
 
-            foreach (IAbsorber prey in absorbers)
+            foreach (ITargetable prey in absorbers)
             {
                 if (prey == null || !prey.IsActive) continue;
-                if (prey.Size >= selfSize) continue;
+                if (prey.Size.Current >= selfSize) continue;
 
                 Vector2 toPrey = prey.CurrentPosition - selfPosition;
                 float sqrPreyDistance = toPrey.sqrMagnitude;
@@ -39,13 +39,13 @@ namespace Game.Gameplay
 
                 float distanceWeight = 1f / (sqrPreyDistance + _epsilon);
 
-                float sizeRatio = (selfSize - prey.Size) / (float)Mathf.Max(selfSize, 1);
+                float sizeRatio = (selfSize - prey.Size.Current) / (float)Mathf.Max(selfSize, 1);
                 float weightBoost = Mathf.Lerp(_minBoost, _maxPreyAttractionBoost, Mathf.Clamp01(sizeRatio));
                 
                 sum += toPrey.normalized * distanceWeight * weightBoost;
             }
             
-            if (mainTarget != null && mainTarget.IsActive && selfSize > mainTarget.Size)
+            if (mainTarget != null && mainTarget.IsActive && selfSize > mainTarget.Size.Current)
             {
                 Vector2 toMainTarget = mainTarget.CurrentPosition - selfPosition;
                 

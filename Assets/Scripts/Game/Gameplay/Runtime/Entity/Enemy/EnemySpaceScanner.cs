@@ -11,12 +11,13 @@ namespace Game.Gameplay
         private Rigidbody2D _rigidbody;
         private Transform _ownerTransform;
         
-        private readonly HashSet<IAbsorbable> _absorbables = new();
-        private readonly HashSet<IAbsorber> _absorbers = new();
-        private readonly HashSet<IAbsorbable> _tracked = new();
+        private readonly HashSet<ITargetable> _absorbables = new();
+        private readonly HashSet<ITargetable> _absorbers = new();
+        private readonly Dictionary<IAbsorbable, ITargetable> _trackedAbsorbables = new();
+        private readonly Dictionary<IAbsorber, ITargetable> _trackedAbsorbers = new();
 
-        internal IReadOnlyCollection<IAbsorbable> Absorbables => _absorbables;
-        internal IReadOnlyCollection<IAbsorber> Absorbers => _absorbers;
+        internal IReadOnlyCollection<ITargetable> Absorbables => _absorbables;
+        internal IReadOnlyCollection<ITargetable> Absorbers => _absorbers;
         
         internal void Initialize(Transform ownerTransform, float scannerRadius)
         {
@@ -36,22 +37,30 @@ namespace Game.Gameplay
             _rigidbody = GetComponent<Rigidbody2D>();
             _rigidbody.bodyType = RigidbodyType2D.Kinematic;
         }
-
+        
         private void OnTriggerEnter2D(Collider2D other)
         {
             if (IsOwner(other))
                 return;
             
-            if (!other.TryGetComponent(out IAbsorbable absorbable))
+            if (!other.TryGetComponent(out ITargetable targetable))
                 return;
-            
-            if (_tracked.Add(absorbable))
-                absorbable.Absorbed += OnAbsorbed;
-            
-            if (absorbable is IAbsorber absorber)
-                _absorbers.Add(absorber);
-            else
-                _absorbables.Add(absorbable);
+
+            if (other.TryGetComponent(out IAbsorbable absorbable))
+            {
+                _absorbables.Add(targetable);
+
+                if (_trackedAbsorbables.TryAdd(absorbable, targetable))
+                    absorbable.Absorbed += OnAbsorbed;
+            }
+
+            if (other.TryGetComponent(out IAbsorber absorber))
+            {
+                _absorbers.Add(targetable);
+
+                if (_trackedAbsorbers.TryAdd(absorber, targetable))
+                    absorber.BecameInactive += OnAbsorberBecameInactive;
+            }
         }
 
         private void OnTriggerExit2D(Collider2D other)
@@ -59,10 +68,11 @@ namespace Game.Gameplay
             if (IsOwner(other))
                 return;
             
-            if (!other.TryGetComponent(out IAbsorbable absorbable))
-                return;
-
-            Remove(absorbable);
+            if (other.TryGetComponent(out IAbsorbable absorbable))
+                RemoveAbsorbable(absorbable);
+            
+            if (other.TryGetComponent(out IAbsorber absorber))
+                RemoveAbsorber(absorber);
         }
         
         private bool IsOwner(Collider2D other)
@@ -70,20 +80,32 @@ namespace Game.Gameplay
             return other.transform == _ownerTransform || other.transform.IsChildOf(_ownerTransform);
         }
 
-        private void Remove(IAbsorbable absorbable)
+        private void RemoveAbsorbable(IAbsorbable absorbable)
         {
-            if (absorbable is IAbsorber absorber)
-                _absorbers.Remove(absorber);
-            else
-                _absorbables.Remove(absorbable);
-            
-            if (_tracked.Remove(absorbable))
+            if (_trackedAbsorbables.Remove(absorbable, out ITargetable targetable))
+            {
                 absorbable.Absorbed -= OnAbsorbed;
+                _absorbables.Remove(targetable);
+            }
+        }
+
+        private void RemoveAbsorber(IAbsorber absorber)
+        {
+            if (_trackedAbsorbers.Remove(absorber, out ITargetable targetable))
+            {
+                absorber.BecameInactive -= OnAbsorberBecameInactive;
+                _absorbers.Remove(targetable);
+            }
         }
         
         private void OnAbsorbed(IAbsorbable absorbable)
         {
-            Remove(absorbable);
+            RemoveAbsorbable(absorbable);
+        }
+        
+        private void OnAbsorberBecameInactive(IAbsorber absorber)
+        {
+            RemoveAbsorber(absorber);
         }
     }
 }
