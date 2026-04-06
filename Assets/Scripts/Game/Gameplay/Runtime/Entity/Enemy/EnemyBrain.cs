@@ -6,7 +6,7 @@ namespace Game.Gameplay
 {
     internal class EnemyBrain : MonoBehaviour
     {
-        private ITargetable _mainTarget;
+        private IBody _mainTarget;
         private EnemySpaceScanner _spaceScanner;
         private PlayField _playField;
        
@@ -27,7 +27,7 @@ namespace Game.Gameplay
         private Vector2 _smoothedDirection = Vector2.right;
 
         [Inject]
-        private void Construct(ITargetable mainTarget, PlayField playField)
+        private void Construct(IBody mainTarget, PlayField playField)
         {
             _mainTarget = mainTarget ?? throw new ArgumentNullException(nameof(mainTarget));
             _playField = playField ?? throw new ArgumentNullException(nameof(playField));;

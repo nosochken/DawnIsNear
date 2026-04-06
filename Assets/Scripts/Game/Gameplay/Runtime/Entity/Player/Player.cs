@@ -29,7 +29,7 @@ namespace Game.Gameplay
 
         private void FixedUpdate()
         {
-            _movement.MoveTo(_input.PointerScreenPosition, Size.Current);
+            _movement.MoveTo(_input.PointerScreenPosition, Body.Size.Current);
         }
     }
 }

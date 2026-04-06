@@ -8,11 +8,11 @@ namespace Game.Presentation
     public class CameraMovement : MonoBehaviour
     {
         private Camera _camera;
-        private ITargetable _target;
+        private IBody _target;
         private PlayField _playField;
         
         [Inject]
-        private void Construct(ITargetable  target, PlayField playField)
+        private void Construct(IBody target, PlayField playField)
         {
             _target = target ?? throw new ArgumentNullException(nameof(target));
             _playField = playField ?? throw new ArgumentNullException(nameof(playField));

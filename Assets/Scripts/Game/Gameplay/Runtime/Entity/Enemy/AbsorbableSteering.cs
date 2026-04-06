@@ -14,12 +14,12 @@ namespace Game.Gameplay
             _epsilon = epsilon;
         }
         
-        internal Vector2 ComputeAbsorbablesAttraction(IReadOnlyCollection<ITargetable> absorbables, Vector2 selfPosition)
+        internal Vector2 ComputeAbsorbablesAttraction(IReadOnlyCollection<IBody> absorbables, Vector2 selfPosition)
         {
             float absorbableRadiusSqr = _absorbRadius * _absorbRadius;
             Vector2 sum = Vector2.zero;
 
-            foreach (ITargetable absorbable in absorbables)
+            foreach (IBody absorbable in absorbables)
             {
                 if (absorbable == null || !absorbable.IsActive) continue;
 

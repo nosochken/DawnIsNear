@@ -34,7 +34,7 @@ namespace Game.GameFlow
             
             Container.Bind<PlayerConfig>().FromInstance(_levelConfig.PlayerConfig).AsSingle();
             Container.Bind<Player>().FromComponentInNewPrefab(_levelConfig.PlayerConfig.Prefab).AsSingle().NonLazy();
-            Container.Bind<ITargetable>().To<Player>().FromResolve();
+            Container.Bind<IBody>().FromMethod(context => context.Container.Resolve<Player>().Body).AsSingle();
             
             Container.Bind<PlayField>().FromInstance(_playField).AsSingle();
         }

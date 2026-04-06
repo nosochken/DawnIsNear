@@ -3,30 +3,35 @@ using UnityEngine;
 
 namespace Game.Gameplay
 {
-    [RequireComponent(typeof(Absorbable), typeof(Absorber))]
-    public abstract class Unit : MonoBehaviour, ITargetable
+    [RequireComponent(typeof(Body))]
+    [RequireComponent(typeof(Absorbable), typeof(AbsorbableOverTime), typeof(Absorber))]
+    public abstract class Unit : MonoBehaviour
     {
-        private Size _size;
+        private Body _body;
         private Absorbable _absorbable;
+        private AbsorbableOverTime _absorbableOverTime;
         private Absorber _absorber;
         
         public string Name { get; private set; }
-        public bool IsActive => isActiveAndEnabled;
-        public ISizeData Size => _size;
-        public ISizeEvents Resize => _size;
-        public Vector2 CurrentPosition => transform.position;
         
-        public IAbsorbableEvents Absorbable => _absorbable;
+        public IBody Body => _body;
+        public IAbsorbable Absorbable => _absorbable;
 
-        protected void InitializeBase(SizeData data)
+        protected void InitializeBase(SizeData data)    
         {
-            _size = new Size(data.MinSize);
+            Size size = new Size(data.MinSize);
+            
+            _body = GetComponent<Body>();
+            _body.Initialize(size);
             
             _absorbable = GetComponent<Absorbable>();
-            _absorbable.Initialize(_size, data.DelayInDecrease);
+            _absorbable.Initialize(size);
+            
+            _absorbableOverTime = GetComponent<AbsorbableOverTime>();
+            _absorbableOverTime.Initialize(_absorbable, size, data.DelayInDecrease);
             
             _absorber = GetComponent<Absorber>();
-            _absorber.Initialize(_size);
+            _absorber.Initialize(size);
         }
         
         public void SetName(string newName)

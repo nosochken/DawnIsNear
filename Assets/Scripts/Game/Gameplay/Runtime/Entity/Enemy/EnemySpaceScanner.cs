@@ -11,13 +11,13 @@ namespace Game.Gameplay
         private Rigidbody2D _rigidbody;
         private Transform _ownerTransform;
         
-        private readonly HashSet<ITargetable> _absorbables = new();
-        private readonly HashSet<ITargetable> _absorbers = new();
-        private readonly Dictionary<IAbsorbable, ITargetable> _trackedAbsorbables = new();
-        private readonly Dictionary<IAbsorber, ITargetable> _trackedAbsorbers = new();
+        private readonly HashSet<IBody> _absorbables = new();
+        private readonly HashSet<IBody> _absorbers = new();
+        private readonly Dictionary<IAbsorbable, IBody> _trackedAbsorbables = new();
+        private readonly Dictionary<IAbsorber, IBody> _trackedAbsorbers = new();
 
-        internal IReadOnlyCollection<ITargetable> Absorbables => _absorbables;
-        internal IReadOnlyCollection<ITargetable> Absorbers => _absorbers;
+        internal IReadOnlyCollection<IBody> Absorbables => _absorbables;
+        internal IReadOnlyCollection<IBody> Absorbers => _absorbers;
         
         internal void Initialize(Transform ownerTransform, float scannerRadius)
         {
@@ -43,7 +43,7 @@ namespace Game.Gameplay
             if (IsOwner(other))
                 return;
             
-            if (!other.TryGetComponent(out ITargetable targetable))
+            if (!other.TryGetComponent(out IBody targetable))
                 return;
 
             if (other.TryGetComponent(out IAbsorbable absorbable))
@@ -82,7 +82,7 @@ namespace Game.Gameplay
 
         private void RemoveAbsorbable(IAbsorbable absorbable)
         {
-            if (_trackedAbsorbables.Remove(absorbable, out ITargetable targetable))
+            if (_trackedAbsorbables.Remove(absorbable, out IBody targetable))
             {
                 absorbable.Absorbed -= OnAbsorbed;
                 _absorbables.Remove(targetable);
@@ -91,7 +91,7 @@ namespace Game.Gameplay
 
         private void RemoveAbsorber(IAbsorber absorber)
         {
-            if (_trackedAbsorbers.Remove(absorber, out ITargetable targetable))
+            if (_trackedAbsorbers.Remove(absorber, out IBody targetable))
             {
                 absorber.BecameInactive -= OnAbsorberBecameInactive;
                 _absorbers.Remove(targetable);

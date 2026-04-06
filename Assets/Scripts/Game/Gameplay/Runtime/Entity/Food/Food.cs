@@ -4,25 +4,37 @@ using UnityEngine;
 namespace Game.Gameplay
 {
     [RequireComponent(typeof(PolygonCollider2D))]
-    public class Food : MonoBehaviour, IAbsorbable, ITargetable, ISpawnable<Food>
+    [RequireComponent(typeof(Body), typeof(Absorbable))]
+    public class Food : MonoBehaviour, ISpawnable<Food>
     {
-        private Size _size;
-       
-        public event Action<IAbsorbable> Absorbed;
+        private Body _body;
+        private Absorbable _absorbable;
+        
         public event Action<Food> ReadyToSpawn;
-
-        public bool IsActive => isActiveAndEnabled;
-        public ISizeData Size => _size;
-        public Vector2 CurrentPosition => transform.position;
 
         private void Awake()
         {
-            _size = new Size(1);
+            Size size = new Size(1);
+            
+            _body = GetComponent<Body>();
+            _body.Initialize(size);
+            
+            _absorbable = GetComponent<Absorbable>();
+            _absorbable.Initialize(size);
         }
 
-        public void BeAbsorbed()
+        private void OnEnable()
         {
-            Absorbed?.Invoke(this);
+            _absorbable.Absorbed += OnAbsorbed;
+        }
+
+        private void OnDisable()
+        {
+            _absorbable.Absorbed -= OnAbsorbed;
+        }
+
+        private void OnAbsorbed(IAbsorbable absorbable)
+        {
             ReadyToSpawn?.Invoke(this);
         }
     }

@@ -15,17 +15,17 @@ public class SizeDisplay : MonoBehaviour
 
     private void OnEnable()
     {
-        _unit.Resize.SizeChanged += UpdateVisuals;
+        _unit.Body.Size.Changed += UpdateVisuals;
     }
 
     private void OnDisable()
     {
-        _unit.Resize.SizeChanged -= UpdateVisuals;
+        _unit.Body.Size.Changed -= UpdateVisuals;
     }
 
     private void UpdateVisuals(int size)
     {
-        float scale = Mathf.Max(_unit.Size.Min + Mathf.Sqrt(size) * ScalePerSize, _unit.Size.Min);
+        float scale = Mathf.Max(_unit.Body.Size.Min + Mathf.Sqrt(size) * ScalePerSize, _unit.Body.Size.Min);
         transform.localScale = Vector3.one * scale;
     }
 }

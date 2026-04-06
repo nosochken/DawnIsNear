@@ -10,10 +10,6 @@ namespace Game.Gameplay
         private AbsorbableDetector _absorbableDetector;
         
         public event Action<IAbsorber> BecameInactive;
-        
-        public bool IsActive => isActiveAndEnabled;
-        public int CurrentSize => _size.Current;
-        public Vector2 CurrentPosition => transform.position;
 
         internal void Initialize(Size size)
         {

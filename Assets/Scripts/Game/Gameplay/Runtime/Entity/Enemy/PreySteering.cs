@@ -22,13 +22,13 @@ namespace Game.Gameplay
             _epsilon = epsilon;
         }
         
-        internal Vector2 ComputePreyAttraction(IReadOnlyCollection<ITargetable> absorbers, ITargetable mainTarget, 
+        internal Vector2 ComputePreyAttraction(IReadOnlyCollection<IBody> absorbers, IBody mainTarget, 
             Vector2 selfPosition, int selfSize)
         {
             float preyRadiusSqr = _absorbRadius * _absorbRadius;
             Vector2 sum = Vector2.zero;
 
-            foreach (ITargetable prey in absorbers)
+            foreach (IBody prey in absorbers)
             {
                 if (prey == null || !prey.IsActive) continue;
                 if (prey.Size.Current >= selfSize) continue;

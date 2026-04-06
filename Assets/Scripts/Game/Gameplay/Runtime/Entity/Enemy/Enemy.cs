@@ -17,7 +17,7 @@ namespace Game.Gameplay
         public event Action<Enemy> ReadyToSpawn;
 
         [Inject]
-        internal void Initialize(EnemyConfig config)
+        private void Construct(EnemyConfig config)
         {
             _config = config ?? throw new ArgumentNullException(nameof(config));
             
@@ -39,17 +39,17 @@ namespace Game.Gameplay
         private void Start()
         {
             _brain.Initialize(transform, _collider, _config.BrainData);
-            _movement.Initialize(_config.MovementSpeed, Size.Min);
+            _movement.Initialize(_config.MovementSpeed, Body.Size.Min);
         }
 
         private void Update()
         {
-            _targetDirection = _brain.GetBestTarget(CurrentPosition, Size.Current);
+            _targetDirection = _brain.GetBestTarget(Body.CurrentPosition, Body.Size.Current);
         }
 
         private void FixedUpdate()
         {
-            _movement.MoveByDirection(_targetDirection, Size.Current);
+            _movement.MoveByDirection(_targetDirection, Body.Size.Current);
         }
 
         private void OnDisable()

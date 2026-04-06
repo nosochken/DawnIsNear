@@ -19,14 +19,14 @@ namespace Game.Gameplay
             _epsilon = epsilon;
         }
         
-        internal Vector2 ComputeThreatRepulsion(out float panic, IReadOnlyCollection<ITargetable> absorbers, 
+        internal Vector2 ComputeThreatRepulsion(out float panic, IReadOnlyCollection<IBody> absorbers, 
             Vector2 selfPosition, int selfSize)
         {
             float dangerRadiusSqr = _dangerRadius * _dangerRadius;
             Vector2 sum = Vector2.zero;
             float maxPanic = 0f;
 
-            foreach (ITargetable threat in absorbers)
+            foreach (IBody threat in absorbers)
             {
                 if (threat == null || !threat.IsActive) continue;
                 if (threat.Size.Current <= selfSize) continue;
