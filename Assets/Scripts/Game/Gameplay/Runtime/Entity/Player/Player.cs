@@ -18,7 +18,7 @@ namespace Game.Gameplay
             if (config == null)
                 throw new ArgumentNullException(nameof(config));
             
-            InitializeBase(config.Size);
+            InitializeBase(EntityType.Player, config.Size);
         }
         
         private void Awake()

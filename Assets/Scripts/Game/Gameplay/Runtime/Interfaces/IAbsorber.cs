@@ -2,8 +2,10 @@ using System;
 
 namespace Game.Gameplay
 {
-    public interface IAbsorber
+    internal interface IAbsorber
     {
         public event Action<IAbsorber> BecameInactive;
+        
+        public EntityType Type { get; }
     }
 }

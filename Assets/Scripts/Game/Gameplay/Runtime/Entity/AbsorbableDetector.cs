@@ -18,8 +18,8 @@ namespace Game.Gameplay
 
         private void OnTriggerEnter2D(Collider2D trigger)
         {
-            if (trigger.TryGetComponent(out IAbsorbable depletable))
-                Detected?.Invoke(depletable);
+            if (trigger.TryGetComponent(out IAbsorbable absorbable))
+                Detected?.Invoke(absorbable);
         }
     }
 }

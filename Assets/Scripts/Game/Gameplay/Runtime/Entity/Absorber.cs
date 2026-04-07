@@ -3,42 +3,34 @@ using UnityEngine;
 
 namespace Game.Gameplay
 {
-    [RequireComponent(typeof(AbsorbableDetector))]
-    public class Absorber : MonoBehaviour, IAbsorber
+    internal class Absorber : MonoBehaviour, IAbsorber
     {
         private Size _size;
-        private AbsorbableDetector _absorbableDetector;
         
         public event Action<IAbsorber> BecameInactive;
+        
+        public EntityType Type { get; private set; }
 
-        internal void Initialize(Size size)
+        internal void Initialize(EntityType type, Size size)
         {
+            Type = type;
             _size = size ?? throw new ArgumentNullException(nameof(size));
-            _absorbableDetector = GetComponent<AbsorbableDetector>();
-        }
-
-        private void OnEnable()
-        {
-            _absorbableDetector.Detected +=  OnDetected;
         }
 
         private void OnDisable()
         {
-            _absorbableDetector.Detected -=  OnDetected;
-            
             BecameInactive?.Invoke(this);
         }
+
+        public bool CanAbsorb(IAbsorbable absorbable)
+        {
+            return absorbable.Size.Current <= _size.Current;
+        }
         
-        private void Absorb(IAbsorbable absorbable)
+        public void Absorb(IAbsorbable absorbable)
         {
             _size.Increase(absorbable.Size.Current);
             absorbable.BeAbsorbed();
-        }
-        
-        private void OnDetected(IAbsorbable absorbable)
-        {
-            if (absorbable.Size.Current <= _size.Current)
-                Absorb(absorbable);
         }
     }
 }

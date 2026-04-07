@@ -20,7 +20,7 @@ namespace Game.Gameplay
             _body.Initialize(size);
             
             _absorbable = GetComponent<Absorbable>();
-            _absorbable.Initialize(size);
+            _absorbable.Initialize(EntityType.Food, size);
         }
 
         private void OnEnable()

@@ -6,6 +6,8 @@ namespace Game.Gameplay
     {
         public event Action<IAbsorbable> Absorbed;
         
+        public EntityType Type { get; }
+        
         public ISize Size { get; }
 
         public void BeAbsorbed();

@@ -21,7 +21,7 @@ namespace Game.Gameplay
         {
             _config = config ?? throw new ArgumentNullException(nameof(config));
             
-            InitializeBase(_config.Size);
+            InitializeBase(EntityType.Enemy, _config.Size);
         }
         
         private void Awake()
@@ -31,8 +31,9 @@ namespace Game.Gameplay
             _movement = GetComponent<EnemyMovement>();
         }
 
-        private void OnEnable()
+        protected override void OnEnable()
         {
+            base.OnEnable();
             Absorbable.Absorbed += OnAbsorbed;
         }
         
@@ -52,8 +53,9 @@ namespace Game.Gameplay
             _movement.MoveByDirection(_targetDirection, Body.Size.Current);
         }
 
-        private void OnDisable()
+        protected override void OnDisable()
         {
+            base.OnDisable();
             Absorbable.Absorbed -= OnAbsorbed;
         }
 
