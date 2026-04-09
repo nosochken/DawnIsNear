@@ -10,11 +10,12 @@ namespace Game.Gameplay
         public event Action<IAbsorbable> Absorbed;
         
         public EntityType Type {get; private set;}
-        public ISize Size => _size;
+        public IBody Body {get; private set;}
 
-        internal void Initialize(EntityType type, Size size)
+        internal void Initialize(EntityType type, IBody body, Size size)
         {
             Type = type;
+            Body = body ?? throw new ArgumentNullException(nameof(body));
             _size = size ?? throw new ArgumentNullException(nameof(size));
         }
 

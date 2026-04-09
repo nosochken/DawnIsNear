@@ -3,7 +3,7 @@ using UnityEngine;
 
 namespace Game.Gameplay
 {
-    internal sealed class BoundarySteering
+    internal sealed class BoundaryRepulsionSteering
     {
         private const float AxisComponentEpsilon = 0.0001f;
 
@@ -13,7 +13,7 @@ namespace Game.Gameplay
         private readonly float _epsilon;
         private readonly float _boundaryThreshold;
 
-        internal BoundarySteering(CapsuleCollider2D collider, PlayField playField,
+        internal BoundaryRepulsionSteering(CapsuleCollider2D collider, PlayField playField,
             float avoidDistance, float epsilon, float boundaryThreshold)
         {
             if (collider == null)
@@ -29,7 +29,7 @@ namespace Game.Gameplay
             _boundaryThreshold = boundaryThreshold;
         }
 
-        internal Vector2 ComputeBoundaryRepulsion(Vector2 selfPosition)
+        internal Vector2 Compute(Vector2 selfPosition)
         {
             _boundary.GetAllowedBounds(out float minAllowedX, out float maxAllowedX, 
                 out float minAllowedY, out float maxAllowedY);

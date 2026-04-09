@@ -20,6 +20,7 @@ namespace Game.Gameplay
         
         public IBody Body => _body;
         public IAbsorbable Absorbable => _absorbable;
+        public IAbsorber Absorber => _absorber;
 
         protected void InitializeBase(EntityType type, SizeData data)    
         {
@@ -29,13 +30,13 @@ namespace Game.Gameplay
             _body.Initialize(size);
             
             _absorbable = GetComponent<Absorbable>();
-            _absorbable.Initialize(type, size);
+            _absorbable.Initialize(type, _body, size);
             
             _absorbableOverTime = GetComponent<AbsorbableOverTime>();
             _absorbableOverTime.Initialize(_absorbable, size, data.DelayInDecrease);
             
             _absorber = GetComponent<Absorber>();
-            _absorber.Initialize(type, size);
+            _absorber.Initialize(type, _body, size);
             
             _absorbableDetector = GetComponent<AbsorbableDetector>();
         }

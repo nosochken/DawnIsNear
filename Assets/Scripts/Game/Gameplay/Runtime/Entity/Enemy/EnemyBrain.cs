@@ -6,31 +6,29 @@ namespace Game.Gameplay
 {
     internal class EnemyBrain : MonoBehaviour
     {
-        private IBody _mainTarget;
+        private IAbsorbable _mainTarget;
         private EnemySpaceScanner _spaceScanner;
         private PlayField _playField;
        
-        private ThreatSteering _threatSteering;
-        private AbsorbableSteering _absorbableSteering;
-        private PreySteering _preySteering;
-        private BoundarySteering _boundarySteering;
+        private AbsorberRepulsionSteering _absorberRepulsionSteering;
+        private AbsorbableAttractionSteering _absorbableAttractionSteering;
+        private BoundaryRepulsionSteering _boundaryRepulsionSteering;
         private WanderSteering _wanderSteering;
 
-        private float _absorbableWeight;
-        private float _preyWeight;
-        private float _threatWeightMin;
-        private float _threatWeightMax;
+        private float _minAbsorberRepulsionWeight;
+        private float _maxAbsorberRepulsionWeight;
+        private float _absorbableAttractionWeight;
+        private float _boundaryRepulsionWeight;
         private float _wanderWeight;
-        private float _boundaryWeight;
         
         private float _directionChangeRate;
         private Vector2 _smoothedDirection = Vector2.right;
 
         [Inject]
-        private void Construct(IBody mainTarget, PlayField playField)
+        private void Construct(IAbsorbable mainTarget, PlayField playField)
         {
             _mainTarget = mainTarget ?? throw new ArgumentNullException(nameof(mainTarget));
-            _playField = playField ?? throw new ArgumentNullException(nameof(playField));;
+            _playField = playField ?? throw new ArgumentNullException(nameof(playField));
         }
 
         internal void Initialize(Transform selfTransform, CapsuleCollider2D collider, EnemyBrainData data)
@@ -48,24 +46,21 @@ namespace Game.Gameplay
             
             _spaceScanner.Initialize(selfTransform, scannerRadius);
             
-            _absorbableWeight = data.AbsorbableWeight;
-            _preyWeight =  data.PreyWeight;
-            _threatWeightMin = data.ThreatWeightMin; 
-            _threatWeightMax = data.ThreatWeightMax;
+            _minAbsorberRepulsionWeight = data.MinAbsorberRepulsionWeight; 
+            _maxAbsorberRepulsionWeight = data.MaxAbsorberRepulsionWeight;
+            _absorbableAttractionWeight = data.AbsorbableAttractionWeight;
+            _boundaryRepulsionWeight = data.BoundaryRepulsionWeight;
             _wanderWeight = data.WanderWeight;
-            _boundaryWeight = data.BoundaryWeight;
             
             _directionChangeRate = data.DirectionChangeRate;
 
-            _threatSteering = new ThreatSteering(data.DangerRadius, data.MinBoost,
-                data.MaxThreatRepulsionBoost, data.SqrDistanceEpsilon);
+            _absorberRepulsionSteering = new AbsorberRepulsionSteering(data.DangerRadius, data.MinBoost,
+                data.MaxAbsorberRepulsionBoost, data.SqrDistanceEpsilon);
             
-            _absorbableSteering = new AbsorbableSteering(data.AbsorbRadius, data.SqrDistanceEpsilon);
+            _absorbableAttractionSteering = new AbsorbableAttractionSteering(data.AbsorbRadius, data.MinBoost, 
+                data.MaxAbsorbableAttractionBoost, data.MainTargetAttractionBias, data.SqrDistanceEpsilon);
             
-            _preySteering = new PreySteering(data.AbsorbRadius, data.MinBoost,
-                data.MaxPreyAttractionBoost, data.MainTargetHuntBias, data.SqrDistanceEpsilon);
-            
-            _boundarySteering = new BoundarySteering(collider, _playField, data.BoundaryAvoidDistance,
+            _boundaryRepulsionSteering = new BoundaryRepulsionSteering(collider, _playField, data.BoundaryAvoidDistance,
                 data.BoundaryDistanceEpsilon, data.BoundaryThreshold);
             
             _wanderSteering = new WanderSteering(data.MinDelayWanderChange, data.MaxDelayWanderChange);
@@ -79,34 +74,29 @@ namespace Game.Gameplay
                 throw new InvalidOperationException("EnemySpaceScanner is not found.");
         }
 
-        internal Vector2 GetBestTarget(Vector2 position, int size)
+        internal Vector2 GetBestTarget(Enemy self)
         {
-            Vector2 selfPosition = position;
-            int selfSize = size;
-            
-            Vector2 desiredDirection = ComputeDesiredDirection(out Vector2 threatForce, selfPosition, selfSize);
-            desiredDirection = _boundarySteering.ResolveDirection(desiredDirection, selfPosition, threatForce);
+            Vector2 desiredDirection = ComputeDesiredDirection(out Vector2 absorberRepulsionForce, self);
+            desiredDirection = _boundaryRepulsionSteering.ResolveDirection(desiredDirection, self.Body.CurrentPosition, absorberRepulsionForce);
             
             return GetSmoothedDirection(desiredDirection);
         }
 
-        private Vector2 ComputeDesiredDirection(out Vector2 threatForce, Vector2 selfPosition, int selfSize)
+        private Vector2 ComputeDesiredDirection(out Vector2 absorberRepulsionForce, Enemy self)
         {
-            threatForce = _threatSteering.ComputeThreatRepulsion(out float panic, _spaceScanner.Absorbers, selfPosition, selfSize);
-            Vector2 absorbableForce = _absorbableSteering.ComputeAbsorbablesAttraction(_spaceScanner.Absorbables, selfPosition);
-            Vector2 preyForce = _preySteering.ComputePreyAttraction(_spaceScanner.Absorbers, _mainTarget, selfPosition, selfSize);
-            Vector2 boundaryForce = _boundarySteering.ComputeBoundaryRepulsion(selfPosition);
+            absorberRepulsionForce = _absorberRepulsionSteering.Compute(out float panic, _spaceScanner.Absorbers, self.Absorbable);
+            Vector2 absorbableAttractionForce = _absorbableAttractionSteering.Compute(_spaceScanner.Absorbables, _mainTarget, self.Absorber);
+            Vector2 boundaryRepulsionForce = _boundaryRepulsionSteering.Compute(self.Body.CurrentPosition);
             
-            float threatWeight = Mathf.Lerp(_threatWeightMin, _threatWeightMax, panic * panic);
+            float absorberRepulsionWeight = Mathf.Lerp(_minAbsorberRepulsionWeight, _maxAbsorberRepulsionWeight, panic * panic);
             
             Vector2 desired =
-                threatForce * threatWeight +
-                absorbableForce * _absorbableWeight +
-                preyForce * _preyWeight +
-                boundaryForce * _boundaryWeight;
+                absorberRepulsionForce * absorberRepulsionWeight +
+                absorbableAttractionForce * _absorbableAttractionWeight +
+                boundaryRepulsionForce * _boundaryRepulsionWeight;
 
             if (desired.sqrMagnitude < DirectionMath.MinSqrMagnitudeForDirection)
-                desired = _wanderSteering.ComputeWander() * _wanderWeight;
+                desired = _wanderSteering.Compute() * _wanderWeight;
             
             return NormalizeDirectionSafe(desired);
         }

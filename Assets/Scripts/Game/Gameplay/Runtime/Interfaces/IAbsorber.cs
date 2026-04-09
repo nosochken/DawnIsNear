@@ -2,10 +2,12 @@ using System;
 
 namespace Game.Gameplay
 {
-    internal interface IAbsorber
+    public interface IAbsorber
     {
         public event Action<IAbsorber> BecameInactive;
         
-        public EntityType Type { get; }
+        public IBody Body { get; }
+
+        public bool CanAbsorb(IAbsorbable absorbable);
     }
 }

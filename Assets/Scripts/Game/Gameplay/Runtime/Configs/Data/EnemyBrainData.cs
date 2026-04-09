@@ -8,17 +8,16 @@ namespace Game.Gameplay
     {
         [SerializeField, Min(0f)] private float _dangerRadius;
         [SerializeField, Min(0f)] private float _absorbRadius;
-
-        [SerializeField, Min(0f)] private float _absorbableWeight;
-        [SerializeField, Min(0f)] private float _preyWeight;
-        [SerializeField, Min(0f)] private float _threatWeightMin;
-        [SerializeField, Min(0f)] private float _threatWeightMax;
+        
+        [SerializeField, Min(0f)] private float _minAbsorberRepulsionWeight;
+        [SerializeField, Min(0f)] private float _maxAbsorberRepulsionWeight;
+        [SerializeField, Min(0f)] private float _absorbableAttractionWeight;
         [SerializeField, Min(0f)] private float _wanderWeight;
         
         [SerializeField, Min(0f)] private float _minBoost;
-        [SerializeField, Min(0f)] private float _mainTargetHuntBias;
-        [SerializeField, Min(0f)] private float _maxThreatRepulsionBoost;
-        [SerializeField, Min(0f)] private float _maxPreyAttractionBoost;
+        [SerializeField, Min(0f)] private float _mainTargetAttractionBias;
+        [SerializeField, Min(0f)] private float _maxAbsorberRepulsionBoost;
+        [SerializeField, Min(0f)] private float _maxAbsorbableAttractionBoost;
         
         [SerializeField, Min(0f)] private float _minDelayWanderChange;
         [SerializeField, Min(0f)] private float _maxDelayWanderChange;
@@ -26,7 +25,7 @@ namespace Game.Gameplay
         [SerializeField, Min(0f)] private float _sqrDistanceEpsilon;
         [SerializeField, Min(0f)] private float _directionChangeRate;
         
-        [SerializeField, Min(0f)] private float _boundaryWeight;
+        [SerializeField, Min(0f)] private float _boundaryRepulsionWeight;
         [SerializeField, Min(0f)] private float _boundaryAvoidDistance;
         [SerializeField, Min(0f)] private float _boundaryThreshold;
         [SerializeField, Min(0f)] private float _boundaryDistanceEpsilon;
@@ -34,16 +33,15 @@ namespace Game.Gameplay
         public float DangerRadius => _dangerRadius;
         public float AbsorbRadius => _absorbRadius;
 
-        public float AbsorbableWeight => _absorbableWeight;
-        public float PreyWeight => _preyWeight;
-        public float ThreatWeightMin => _threatWeightMin;
-        public float ThreatWeightMax => _threatWeightMax;
+        public float MinAbsorberRepulsionWeight => _minAbsorberRepulsionWeight;
+        public float MaxAbsorberRepulsionWeight => _maxAbsorberRepulsionWeight;
+        public float AbsorbableAttractionWeight => _absorbableAttractionWeight;
         public float WanderWeight => _wanderWeight;
         
         public float MinBoost => _minBoost;
-        public float MainTargetHuntBias => _mainTargetHuntBias;
-        public float MaxThreatRepulsionBoost => _maxThreatRepulsionBoost;
-        public float MaxPreyAttractionBoost => _maxPreyAttractionBoost;
+        public float MainTargetAttractionBias => _mainTargetAttractionBias;
+        public float MaxAbsorberRepulsionBoost => _maxAbsorberRepulsionBoost;
+        public float MaxAbsorbableAttractionBoost => _maxAbsorbableAttractionBoost;
         
         public float MinDelayWanderChange => _minDelayWanderChange;
         public float MaxDelayWanderChange => _maxDelayWanderChange;
@@ -51,7 +49,7 @@ namespace Game.Gameplay
         public float SqrDistanceEpsilon => _sqrDistanceEpsilon;
         public float DirectionChangeRate => _directionChangeRate;
         
-        public float BoundaryWeight => _boundaryWeight;
+        public float BoundaryRepulsionWeight => _boundaryRepulsionWeight;
         public float BoundaryAvoidDistance => _boundaryAvoidDistance;
         public float BoundaryThreshold => _boundaryThreshold;
         public float BoundaryDistanceEpsilon => _boundaryDistanceEpsilon;
@@ -64,18 +62,15 @@ namespace Game.Gameplay
             if (_absorbRadius <= 0f)
                 throw new ArgumentOutOfRangeException(nameof(_absorbRadius));
 
-            if (_absorbableWeight < 0f)
-                throw new ArgumentOutOfRangeException(nameof(_absorbableWeight));
+            if (_minAbsorberRepulsionWeight < 0f)
+                throw new ArgumentOutOfRangeException(nameof(_minAbsorberRepulsionWeight));
 
-            if (_preyWeight < 0f)
-                throw new ArgumentOutOfRangeException(nameof(_preyWeight));
-
-            if (_threatWeightMin < 0f)
-                throw new ArgumentOutOfRangeException(nameof(_threatWeightMin));
-
-            if (_threatWeightMax < _threatWeightMin)
+            if (_maxAbsorberRepulsionWeight < _minAbsorberRepulsionWeight)
                 throw new ArgumentException(
-                    $"{nameof(_threatWeightMax)} must be greater than or equal to {nameof(_threatWeightMin)}");
+                    $"{nameof(_maxAbsorberRepulsionWeight)} must be greater than or equal to {nameof(_minAbsorberRepulsionWeight)}");
+            
+            if (_absorbableAttractionWeight < 0f)
+                throw new ArgumentOutOfRangeException(nameof(_absorbableAttractionWeight));
 
             if (_wanderWeight < 0f)
                 throw new ArgumentOutOfRangeException(nameof(_wanderWeight));
@@ -83,14 +78,14 @@ namespace Game.Gameplay
             if (_minBoost < 0f)
                 throw new ArgumentOutOfRangeException(nameof(_minBoost));
 
-            if (_mainTargetHuntBias < 0f)
-                throw new ArgumentOutOfRangeException(nameof(_mainTargetHuntBias));
+            if (_mainTargetAttractionBias < 0f)
+                throw new ArgumentOutOfRangeException(nameof(_mainTargetAttractionBias));
 
-            if (_maxThreatRepulsionBoost < _minBoost)
-                throw new ArgumentException($"{nameof(_maxThreatRepulsionBoost)} must be greater than or equal to {nameof(_minBoost)}");
+            if (_maxAbsorberRepulsionBoost < _minBoost)
+                throw new ArgumentException($"{nameof(_maxAbsorberRepulsionBoost)} must be greater than or equal to {nameof(_minBoost)}");
 
-            if (_maxPreyAttractionBoost < _minBoost)
-                throw new ArgumentException($"{nameof(_maxPreyAttractionBoost)} must be greater than or equal to {nameof(_minBoost)}");
+            if (_maxAbsorbableAttractionBoost < _minBoost)
+                throw new ArgumentException($"{nameof(_maxAbsorbableAttractionBoost)} must be greater than or equal to {nameof(_minBoost)}");
 
             if (_minDelayWanderChange < 0f)
                 throw new ArgumentOutOfRangeException(nameof(_minDelayWanderChange));
@@ -104,8 +99,8 @@ namespace Game.Gameplay
             if (_directionChangeRate < 0f)
                 throw new ArgumentOutOfRangeException(nameof(_directionChangeRate));
 
-            if (_boundaryWeight < 0f)
-                throw new ArgumentOutOfRangeException(nameof(_boundaryWeight));
+            if (_boundaryRepulsionWeight < 0f)
+                throw new ArgumentOutOfRangeException(nameof(_boundaryRepulsionWeight));
 
             if (_boundaryAvoidDistance <= 0f)
                 throw new ArgumentOutOfRangeException(nameof(_boundaryAvoidDistance));

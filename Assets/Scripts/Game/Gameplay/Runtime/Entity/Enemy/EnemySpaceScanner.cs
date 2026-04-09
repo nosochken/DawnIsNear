@@ -11,13 +11,11 @@ namespace Game.Gameplay
         private Rigidbody2D _rigidbody;
         private Transform _ownerTransform;
         
-        private readonly HashSet<IBody> _absorbables = new();
-        private readonly HashSet<IBody> _absorbers = new();
-        private readonly Dictionary<IAbsorbable, IBody> _trackedAbsorbables = new();
-        private readonly Dictionary<IAbsorber, IBody> _trackedAbsorbers = new();
+        private readonly HashSet<IAbsorbable> _absorbables = new();
+        private readonly HashSet<IAbsorber> _absorbers = new();
 
-        internal IReadOnlyCollection<IBody> Absorbables => _absorbables;
-        internal IReadOnlyCollection<IBody> Absorbers => _absorbers;
+        internal IReadOnlyCollection<IAbsorbable> Absorbables => _absorbables;
+        internal IReadOnlyCollection<IAbsorber> Absorbers => _absorbers;
         
         internal void Initialize(Transform ownerTransform, float scannerRadius)
         {
@@ -42,23 +40,16 @@ namespace Game.Gameplay
         {
             if (IsOwner(other))
                 return;
-            
-            if (!other.TryGetComponent(out IBody targetable))
-                return;
 
             if (other.TryGetComponent(out IAbsorbable absorbable))
             {
-                _absorbables.Add(targetable);
-
-                if (_trackedAbsorbables.TryAdd(absorbable, targetable))
+                if (_absorbables.Add(absorbable))
                     absorbable.Absorbed += OnAbsorbed;
             }
 
             if (other.TryGetComponent(out IAbsorber absorber))
             {
-                _absorbers.Add(targetable);
-
-                if (_trackedAbsorbers.TryAdd(absorber, targetable))
+                if (_absorbers.Add(absorber))
                     absorber.BecameInactive += OnAbsorberBecameInactive;
             }
         }
@@ -75,6 +66,18 @@ namespace Game.Gameplay
                 RemoveAbsorber(absorber);
         }
         
+        private void OnDisable()
+        {
+            foreach (IAbsorbable absorbable in _absorbables)
+                absorbable.Absorbed -= OnAbsorbed;
+
+            foreach (IAbsorber absorber in _absorbers)
+                absorber.BecameInactive -= OnAbsorberBecameInactive;
+
+            _absorbables.Clear();
+            _absorbers.Clear();
+        }
+        
         private bool IsOwner(Collider2D other)
         {
             return other.transform == _ownerTransform || other.transform.IsChildOf(_ownerTransform);
@@ -82,20 +85,14 @@ namespace Game.Gameplay
 
         private void RemoveAbsorbable(IAbsorbable absorbable)
         {
-            if (_trackedAbsorbables.Remove(absorbable, out IBody targetable))
-            {
+            if (_absorbables.Remove(absorbable))
                 absorbable.Absorbed -= OnAbsorbed;
-                _absorbables.Remove(targetable);
-            }
         }
 
         private void RemoveAbsorber(IAbsorber absorber)
         {
-            if (_trackedAbsorbers.Remove(absorber, out IBody targetable))
-            {
+            if (_absorbers.Remove(absorber))
                 absorber.BecameInactive -= OnAbsorberBecameInactive;
-                _absorbers.Remove(targetable);
-            }
         }
         
         private void OnAbsorbed(IAbsorbable absorbable)

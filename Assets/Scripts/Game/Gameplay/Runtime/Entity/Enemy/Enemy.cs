@@ -11,7 +11,7 @@ namespace Game.Gameplay
         private EnemyConfig _config;
         private EnemyBrain _brain;
         private EnemyMovement _movement;
-        
+
         private Vector2 _targetDirection;
         
         public event Action<Enemy> ReadyToSpawn;
@@ -45,7 +45,7 @@ namespace Game.Gameplay
 
         private void Update()
         {
-            _targetDirection = _brain.GetBestTarget(Body.CurrentPosition, Body.Size.Current);
+            _targetDirection = _brain.GetBestTarget(this);
         }
 
         private void FixedUpdate()

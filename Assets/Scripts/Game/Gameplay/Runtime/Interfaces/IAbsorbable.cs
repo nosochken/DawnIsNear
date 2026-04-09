@@ -7,8 +7,7 @@ namespace Game.Gameplay
         public event Action<IAbsorbable> Absorbed;
         
         public EntityType Type { get; }
-        
-        public ISize Size { get; }
+        public IBody Body { get; }
 
         public void BeAbsorbed();
     }

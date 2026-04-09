@@ -18,7 +18,7 @@ namespace Game.Gameplay
             _maxDelayWanderChange = maxDelayWanderChange;
         }
         
-        internal Vector2 ComputeWander()
+        internal Vector2 Compute()
         {
             if (Time.time >= _nextWanderTime)
             {

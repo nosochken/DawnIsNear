@@ -1,37 +1,35 @@
-using System;
 using System.Collections.Generic;
 using UnityEngine;
 
 namespace Game.Gameplay
 {
-    internal sealed class ThreatSteering
+    internal sealed class AbsorberRepulsionSteering
     {
         private float _dangerRadius;
-        private float _minBoost;
-        private float _maxThreatRepulsionBoost;
+        private float _minRepulsionBoost;
+        private float _maxRepulsionBoost;
         private float _epsilon;
         
-        internal ThreatSteering(float dangerRadius, float minBoost, float maxThreatRepulsionBoost, float epsilon)
+        internal AbsorberRepulsionSteering(float dangerRadius, float minRepulsionBoost, float maxRepulsionBoost, float epsilon)
         {
             _dangerRadius = dangerRadius;
-            _minBoost = minBoost;
-            _maxThreatRepulsionBoost = maxThreatRepulsionBoost;
+            _minRepulsionBoost = minRepulsionBoost;
+            _maxRepulsionBoost = maxRepulsionBoost;
             _epsilon = epsilon;
         }
         
-        internal Vector2 ComputeThreatRepulsion(out float panic, IReadOnlyCollection<IBody> absorbers, 
-            Vector2 selfPosition, int selfSize)
+        internal Vector2 Compute(out float panic, IReadOnlyCollection<IAbsorber> absorbers, IAbsorbable self)
         {
             float dangerRadiusSqr = _dangerRadius * _dangerRadius;
             Vector2 sum = Vector2.zero;
             float maxPanic = 0f;
 
-            foreach (IBody threat in absorbers)
+            foreach (IAbsorber absorber in absorbers)
             {
-                if (threat == null || !threat.IsActive) continue;
-                if (threat.Size.Current <= selfSize) continue;
+                if (absorber == null || !absorber.Body.IsActive) continue;
+                if (!absorber.CanAbsorb(self)) continue;
 
-                Vector2 away = selfPosition - threat.CurrentPosition;
+                Vector2 away = self.Body.CurrentPosition - absorber.Body.CurrentPosition;
                 float sqrAwayDistance = away.sqrMagnitude;
                 if (sqrAwayDistance < DirectionMath.MinSqrMagnitudeForDirection || sqrAwayDistance > dangerRadiusSqr) continue;
 
@@ -43,8 +41,8 @@ namespace Game.Gameplay
 
                 float distanceWeight = 1f / (sqrAwayDistance + _epsilon);
 
-                float sizeRatio = (threat.Size.Current - selfSize) / (float)Mathf.Max(selfSize, 1);
-                float sizeBoost = Mathf.Lerp(_minBoost, _maxThreatRepulsionBoost, Mathf.Clamp01(sizeRatio));
+                float sizeRatio = (absorber.Body.Size.Current - self.Body.Size.Current) / (float)Mathf.Max(self.Body.Size.Current, 1);
+                float sizeBoost = Mathf.Lerp(_minRepulsionBoost, _maxRepulsionBoost, Mathf.Clamp01(sizeRatio));
 
                 sum += away.normalized * distanceWeight * sizeBoost;
             }
