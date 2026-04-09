@@ -49,7 +49,7 @@ namespace Game.Gameplay
             return force;
         }
 
-        internal Vector2 ResolveDirection(Vector2 desiredDirection, Vector2 selfPosition, Vector2 threatForce)
+        internal Vector2 ResolveDirection(Vector2 desiredDirection, Vector2 selfPosition, Vector2 absorberRepulsionForce)
         {
             Vector2 adjustedDirection = desiredDirection;
             _boundary.BlockOutboundAxes(ref adjustedDirection, selfPosition, _boundaryThreshold);
@@ -63,7 +63,7 @@ namespace Game.Gameplay
             bool isNearVerticalBoundary = nearMinX || nearMaxX;
             bool isNearHorizontalBoundary = nearMinY || nearMaxY;
 
-            Vector2 fallbackDirection = SelectFallbackDirection(threatForce, desiredDirection);
+            Vector2 fallbackDirection = SelectFallbackDirection(absorberRepulsionForce, desiredDirection);
 
             return SelectAxisSlideDirection(isNearVerticalBoundary, isNearHorizontalBoundary, fallbackDirection,
                 desiredDirection);

@@ -8,16 +8,16 @@ namespace Game.Gameplay
         private float _absorbRadius;
         private float _minAttractionBoost;
         private float _maxAttractionBoost;
-        private float _mainTargetHuntBias;
+        private float _mainTargetAttractionBias;
         private float _epsilon;
         
         internal AbsorbableAttractionSteering(float absorbRadius, float minAttractionBoost, 
-            float maxAttractionBoost,  float mainTargetHuntBias, float epsilon)
+            float maxAttractionBoost,  float mainTargetAttractionBias, float epsilon)
         {
             _absorbRadius = absorbRadius;
             _minAttractionBoost = minAttractionBoost;
             _maxAttractionBoost = maxAttractionBoost;
-            _mainTargetHuntBias = mainTargetHuntBias;
+            _mainTargetAttractionBias = mainTargetAttractionBias;
             _epsilon = epsilon;
         }
         
@@ -48,7 +48,7 @@ namespace Game.Gameplay
                 Vector2 toMainTarget = mainTarget.Body.CurrentPosition - self.Body.CurrentPosition;
                    
                 if (toMainTarget.sqrMagnitude > DirectionMath.MinSqrMagnitudeForDirection)
-                    sum += toMainTarget.normalized * _mainTargetHuntBias;
+                    sum += toMainTarget.normalized * _mainTargetAttractionBias;
             }
 
             return sum;
