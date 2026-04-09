@@ -82,10 +82,10 @@ namespace Game.Gameplay
             return awayDirection * weight;
         }
         
-        private Vector2 SelectFallbackDirection(Vector2 threatForce, Vector2 desiredDirection)
+        private Vector2 SelectFallbackDirection(Vector2 absorberRepulsionForce, Vector2 desiredDirection)
         {
-            if (threatForce.sqrMagnitude > DirectionMath.MinSqrMagnitudeForDirection)
-                return threatForce.normalized;
+            if (absorberRepulsionForce.sqrMagnitude > DirectionMath.MinSqrMagnitudeForDirection)
+                return absorberRepulsionForce.normalized;
 
             if (desiredDirection.sqrMagnitude > DirectionMath.MinSqrMagnitudeForDirection)
                 return desiredDirection.normalized;
