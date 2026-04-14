@@ -12,12 +12,14 @@ namespace Game.Gameplay
         private EnemyBrain _brain;
         private EnemyMovement _movement;
 
+        //private IAbility _ability;
+
         private Vector2 _targetDirection;
         
         public event Action<Enemy> ReadyToSpawn;
 
         [Inject]
-        private void Construct(EnemyConfig config)
+        private void Construct(EnemyConfig config/*, IAbility ability*/)
         {
             _config = config ?? throw new ArgumentNullException(nameof(config));
             

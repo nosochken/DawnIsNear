@@ -9,7 +9,7 @@ namespace Game.Gameplay
         private Size _size;
         private Absorbable _absorbable;
         
-        private float _absorbOverTimeInterval;
+        private float _beAbsorbOverTimeInterval;
         private Coroutine _beAbsorbedCoroutine;
         
         internal void Initialize(Absorbable absorbable, Size size, float delayInDecrease)
@@ -20,16 +20,16 @@ namespace Game.Gameplay
             if (delayInDecrease <= 0f)
                 throw new ArgumentOutOfRangeException(nameof(delayInDecrease));
             
-            _absorbOverTimeInterval = delayInDecrease;
+            _beAbsorbOverTimeInterval = delayInDecrease;
         }
-        
-        private void OnEnable()
+
+        internal void TurnOn()
         {
             if (_beAbsorbedCoroutine == null) 
                 _beAbsorbedCoroutine = StartCoroutine(BeAbsorbedOverTime());
         }
 
-        private void OnDisable()
+        internal void TurnOff()
         {
             if (_beAbsorbedCoroutine != null)
             {
@@ -40,7 +40,7 @@ namespace Game.Gameplay
         
         private IEnumerator BeAbsorbedOverTime()
         {
-            WaitForSeconds wait = new WaitForSeconds(_absorbOverTimeInterval);
+            WaitForSeconds wait = new WaitForSeconds(_beAbsorbOverTimeInterval);
             
             while (isActiveAndEnabled)
             {

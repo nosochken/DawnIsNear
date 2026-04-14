@@ -36,18 +36,23 @@ namespace Game.Gameplay
             _absorbableOverTime.Initialize(_absorbable, size, data.DelayInDecrease);
             
             _absorber = GetComponent<Absorber>();
-            _absorber.Initialize(type, _body, size);
+            UnitAbsorptionPolicy absorptionPolicy = new UnitAbsorptionPolicy();
+            _absorber.Initialize(type, absorptionPolicy, _body, size);
             
             _absorbableDetector = GetComponent<AbsorbableDetector>();
         }
 
         protected virtual void OnEnable()
         {
+            _absorbableOverTime.TurnOn();
+            
             _absorbableDetector.Detected += OnDetected;
         }
 
         protected virtual void OnDisable()
         {
+            _absorbableOverTime.TurnOff();
+            
             _absorbableDetector.Detected -= OnDetected;
         }
         
@@ -62,7 +67,7 @@ namespace Game.Gameplay
         private void OnDetected(IAbsorbable absorbable)
         {
             if (_absorber.CanAbsorb(absorbable))
-                _absorber.Absorb(absorbable);
+                _absorber.Absorb(absorbable);   
         }
     }
 }

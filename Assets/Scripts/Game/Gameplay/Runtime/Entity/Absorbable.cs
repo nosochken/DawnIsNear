@@ -3,7 +3,7 @@ using UnityEngine;
 
 namespace Game.Gameplay
 {
-    public class Absorbable : MonoBehaviour, IAbsorbable
+    internal class Absorbable : MonoBehaviour, IAbsorbable
     {
         private Size _size;
         
@@ -17,6 +17,11 @@ namespace Game.Gameplay
             Type = type;
             Body = body ?? throw new ArgumentNullException(nameof(body));
             _size = size ?? throw new ArgumentNullException(nameof(size));
+        }
+
+        public void DecreaseByOneSize()
+        {
+            _size.Decrease(1);
         }
 
         public void BeAbsorbed()

@@ -10,5 +10,7 @@ namespace Game.Gameplay
         public IBody Body { get; }
 
         public void BeAbsorbed();
+        public void DecreaseByOneSize();
+
     }
 }

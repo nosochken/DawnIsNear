@@ -9,6 +9,7 @@ namespace Game.Gameplay
         private CapsuleCollider2D _collider;
         
         internal event Action<IAbsorbable> Detected;
+        internal event Action<IAbsorbable> Lost;
 
         private void Awake()
         {
@@ -20,6 +21,12 @@ namespace Game.Gameplay
         {
             if (trigger.TryGetComponent(out IAbsorbable absorbable))
                 Detected?.Invoke(absorbable);
+        }
+
+        private void OnTriggerExit2D(Collider2D trigger)
+        {
+            if (trigger.TryGetComponent(out IAbsorbable absorbable))
+                Lost?.Invoke(absorbable);
         }
     }
 }

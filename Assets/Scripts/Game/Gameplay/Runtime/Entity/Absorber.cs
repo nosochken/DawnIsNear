@@ -6,17 +6,19 @@ namespace Game.Gameplay
     internal class Absorber : MonoBehaviour, IAbsorber
     {
         private EntityType _type;
+        private IAbsorptionPolicy _absorptionPolicy;
         private Size _size;
         
         public event Action<IAbsorber> BecameInactive;
         
         public IBody Body { get; private set; }
 
-        internal void Initialize(EntityType type, IBody body, Size size)
+        internal void Initialize(EntityType type, IAbsorptionPolicy absorptionPolicy, IBody body = null, Size size = null)
         {
             _type = type;
-            Body = body ?? throw new ArgumentNullException(nameof(body));
-            _size = size ?? throw new ArgumentNullException(nameof(size));
+            _absorptionPolicy = absorptionPolicy ?? throw new ArgumentNullException(nameof(absorptionPolicy));
+            Body = body;
+            _size = size;
         }
 
         private void OnDisable()
@@ -26,16 +28,15 @@ namespace Game.Gameplay
 
         public bool CanAbsorb(IAbsorbable absorbable)
         {
-            if (AbsorptionRule.CanAbsorb(_type, absorbable.Type)) 
-                return absorbable.Body.Size.Current <= _size.Current;
+            if (AbsorptionRule.CanAbsorb(_type, absorbable.Type))
+                return _absorptionPolicy.CanAbsorb(absorbable, _size);
             
             return false;
         }
         
         public void Absorb(IAbsorbable absorbable)
         {
-            _size.Increase(absorbable.Body.Size.Current);
-            absorbable.BeAbsorbed();
+           _absorptionPolicy.Absorb(absorbable, _size);
         }
     }
 }
