@@ -23,13 +23,13 @@ namespace Game.Gameplay
             _beAbsorbOverTimeInterval = delayInDecrease;
         }
 
-        private void OnEnable()
+        internal void TurnOn()
         {
             if (_beAbsorbedCoroutine == null)
                 _beAbsorbedCoroutine = StartCoroutine(BeAbsorbedOverTime());
         }
 
-        private void OnDisable()
+        internal void TurnOff()
         {
             if (_beAbsorbedCoroutine != null)
             {
@@ -42,19 +42,16 @@ namespace Game.Gameplay
         {
             WaitForSeconds wait = new WaitForSeconds(_beAbsorbOverTimeInterval);
             
-            while (isActiveAndEnabled)
+            while (_size.Current > 0)
             {
                 yield return wait;
-
                 _size.Decrease(1);
-
-                if (_size.Current <= 0)
-                {
-                    _absorbable.BeAbsorbed();
-                    _beAbsorbedCoroutine = null;
-                    yield break;
-                }
             }
+            
+            if (_size.Current <= 0)
+                _absorbable.BeAbsorbed();
+            
+            _beAbsorbedCoroutine = null;
         }
     }
 }

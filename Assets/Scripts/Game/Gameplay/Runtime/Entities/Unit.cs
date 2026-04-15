@@ -8,6 +8,9 @@ namespace Game.Gameplay
     [RequireComponent(typeof(AbsorbableDetector))]
     public abstract class Unit : MonoBehaviour
     {
+        private SizeData _sizeData;
+        private EntityType _type;
+        
         private Body _body;
         
         private Absorbable _absorbable;
@@ -22,22 +25,28 @@ namespace Game.Gameplay
         public IAbsorbable Absorbable => _absorbable;
         public IAbsorber Absorber => _absorber;
 
-        protected void InitializeBase(EntityType type, SizeData data)    
+        protected void ConstructBase(EntityType type, SizeData sizeData)    
         {
-            Size size = new Size(data.MinSize);
+            _type = type;
+            _sizeData = sizeData ?? throw new ArgumentNullException(nameof(sizeData));
+        }
+
+        protected virtual void Awake()
+        {
+            Size size = new Size(_sizeData.MinSize);
             
             _body = GetComponent<Body>();
             _body.Initialize(size);
             
             _absorbable = GetComponent<Absorbable>();
-            _absorbable.Initialize(type, _body, size);
+            _absorbable.Initialize(_type, _body, size);
             
             _absorbableOverTime = GetComponent<AbsorbableOverTime>();
-            _absorbableOverTime.Initialize(_absorbable, size, data.DelayInDecrease);
+            _absorbableOverTime.Initialize(_absorbable, size, _sizeData.DelayInDecrease);
             
             _absorber = GetComponent<Absorber>();
             UnitAbsorptionPolicy absorptionPolicy = new UnitAbsorptionPolicy();
-            _absorber.Initialize(type, absorptionPolicy, _body, size);
+            _absorber.Initialize(_type, absorptionPolicy, _body, size);
             
             _absorbableDetector = GetComponent<AbsorbableDetector>();
         }
@@ -45,11 +54,15 @@ namespace Game.Gameplay
         protected virtual void OnEnable()
         {
             _absorbableDetector.Detected += OnDetected;
+            
+            _absorbableOverTime.TurnOn();
         }
 
         protected virtual void OnDisable()
         {
             _absorbableDetector.Detected -= OnDetected;
+            
+            _absorbableOverTime.TurnOff();
         }
         
         public void SetName(string newName)

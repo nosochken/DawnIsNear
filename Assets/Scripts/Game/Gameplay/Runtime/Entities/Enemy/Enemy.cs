@@ -23,11 +23,12 @@ namespace Game.Gameplay
         {
             _config = config ?? throw new ArgumentNullException(nameof(config));
             
-            InitializeBase(EntityType.Enemy, _config.Size);
+            ConstructBase(EntityType.Enemy, _config.Size);
         }
         
-        private void Awake()
+        protected override void Awake()
         {
+            base.Awake();
             _collider = GetComponent<CapsuleCollider2D>();
             _brain = GetComponent<EnemyBrain>();
             _movement = GetComponent<EnemyMovement>();

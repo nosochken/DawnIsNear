@@ -11,6 +11,7 @@ namespace Game.Gameplay
     public class Slime : MonoBehaviour, ISpawnable<Slime>
     {
         private SlimeConfig _config;
+        
         private Size _size;
         private Body _body;
         
@@ -59,6 +60,8 @@ namespace Game.Gameplay
             _absorbable.Absorbed += OnAbsorbed;
             _absorbableDetector.Detected += OnDetected;
             _absorbableDetector.Lost += OnLost;
+            
+            _absorbableOverTime.TurnOn();
         }
 
         private void OnDisable()
@@ -68,6 +71,8 @@ namespace Game.Gameplay
             _absorbable.Absorbed -= OnAbsorbed;
             _absorbableDetector.Detected -= OnDetected;
             _absorbableDetector.Lost -= OnLost;
+            
+            _absorbableOverTime.TurnOff();
         }
 
         private void OnDetected(IAbsorbable absorbable)

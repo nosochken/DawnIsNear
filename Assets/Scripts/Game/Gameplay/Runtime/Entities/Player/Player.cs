@@ -18,11 +18,12 @@ namespace Game.Gameplay
             if (config == null)
                 throw new ArgumentNullException(nameof(config));
             
-            InitializeBase(EntityType.Player, config.Size);
+            ConstructBase(EntityType.Player, config.Size);
         }
         
-        private void Awake()
+        protected override void Awake()
         {
+            base.Awake();
             _input = GetComponent<PlayerInputController>();
             _movement = GetComponent<PlayerMovement>();
         }

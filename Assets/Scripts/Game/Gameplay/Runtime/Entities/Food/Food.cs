@@ -9,6 +9,7 @@ namespace Game.Gameplay
     public class Food : MonoBehaviour, ISpawnable<Food>
     {
         private FoodConfig _config;
+        
         private Body _body;
         private Absorbable _absorbable;
         
