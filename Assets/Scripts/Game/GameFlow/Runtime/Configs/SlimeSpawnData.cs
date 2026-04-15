@@ -5,12 +5,12 @@ using UnityEngine;
 namespace Game.GameFlow
 {
     [Serializable]
-    public class FoodSpawnData
+    public class SlimeSpawnData
     {
-        [SerializeField] private FoodConfig _config;
+        [SerializeField] private SlimeConfig _config;
         [SerializeField] private int _count;
         
-        public FoodConfig Config => _config;
+        public SlimeConfig Config => _config;
         public int Count => _count;
         
         public void Validate()

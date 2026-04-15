@@ -11,6 +11,7 @@ namespace Game.GameFlow
         [SerializeField] private LevelController _levelController;
         [SerializeField] private EnemySpawner _enemySpawnerPrefab;
         [SerializeField] private FoodSpawner _foodSpawnerPrefab;
+        [SerializeField] private SlimeSpawner _slimeSpawnerPrefab;
         [SerializeField] private PlayField _playField;
 
         public override void InstallBindings()
@@ -26,6 +27,9 @@ namespace Game.GameFlow
 
             if (_foodSpawnerPrefab == null)
                 throw new System.ArgumentNullException(nameof(_foodSpawnerPrefab));
+            
+            if (_slimeSpawnerPrefab == null)
+                throw new System.ArgumentNullException(nameof(_slimeSpawnerPrefab));
 
             if (_playField == null)
                 throw new System.ArgumentNullException(nameof(_playField));
@@ -44,10 +48,13 @@ namespace Game.GameFlow
         {
             List<EnemySpawner> enemySpawners = ConstructEnemySpawners();
 
-            Spawner<Food> foodSpawner = Container.InstantiatePrefabForComponent<FoodSpawner>(_foodSpawnerPrefab);
-            foodSpawner.Initialize(CreateFood, _levelConfig.FoodSpawnData.Count);
+            FoodSpawner foodSpawner = Container.InstantiatePrefabForComponent<FoodSpawner>(_foodSpawnerPrefab);
+            foodSpawner.Initialize(() => CreateFood(_levelConfig.FoodSpawnData.Config), _levelConfig.FoodSpawnData.Count);
+
+            SlimeSpawner slimeSpawner = Container.InstantiatePrefabForComponent<SlimeSpawner>(_slimeSpawnerPrefab);
+            slimeSpawner.Initialize(() => CreateSlime(_levelConfig.SlimeSpawnData.Config), _levelConfig.SlimeSpawnData.Count);
             
-            _levelController.Initialize(enemySpawners, foodSpawner);
+            _levelController.Initialize(enemySpawners, foodSpawner, slimeSpawner);
 
             return _levelController;
         }
@@ -59,21 +66,26 @@ namespace Game.GameFlow
             foreach (EnemySpawnData data in _levelConfig.EnemySpawnData)
             {
                 EnemySpawner enemySpawner = Container.InstantiatePrefabForComponent<EnemySpawner>(_enemySpawnerPrefab);
-                enemySpawner.Initialize(() => CreateEnemy(data.Config.Prefab, data.Config), data.Count);
+                enemySpawner.Initialize(() => CreateEnemy(data.Config), data.Count);
                 enemySpawners.Add(enemySpawner);
             }
 
             return enemySpawners;
         }
 
-        private Enemy CreateEnemy(Enemy prefab, EnemyConfig config)
+        private Enemy CreateEnemy(EnemyConfig config)
         {
-            return Container.InstantiatePrefabForComponent<Enemy>(prefab, new object[] { config });
+            return Container.InstantiatePrefabForComponent<Enemy>(config.Prefab, new object[] { config });
         }
 
-        private Food CreateFood()
+        private Food CreateFood(FoodConfig config)
         {
-            return Container.InstantiatePrefabForComponent<Food>(_levelConfig.FoodSpawnData.Prefab);
+            return Container.InstantiatePrefabForComponent<Food>(config.Prefab, new object[] { config });
+        }
+        
+        private Slime CreateSlime(SlimeConfig config)
+        {
+            return Container.InstantiatePrefabForComponent<Slime>(config.Prefab, new object[] { config });
         }
     }
 }

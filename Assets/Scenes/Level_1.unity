@@ -299,6 +299,7 @@ MonoBehaviour:
   _levelController: {fileID: 676654181}
   _enemySpawnerPrefab: {fileID: 1512942484692852967, guid: 326cce0d4971645f5b0fe415c61e1e22, type: 3}
   _foodSpawnerPrefab: {fileID: 5273638901098970382, guid: 51396241b6f4d4fa2b6563bd2e68ed14, type: 3}
+  _slimeSpawnerPrefab: {fileID: 8303556522261628301, guid: 1a4c0ae10d80747c39929e166792524a, type: 3}
   _playField: {fileID: 447730299}
 --- !u!1 &699049737
 GameObject:
@@ -390,6 +391,14 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4778670232201236050, guid: 9e955c97a884d426086865cf0f45cf12, type: 3}
       propertyPath: m_Offset.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4778670232201236050, guid: 9e955c97a884d426086865cf0f45cf12, type: 3}
+      propertyPath: m_UsedByEffector
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4778670232201236050, guid: 9e955c97a884d426086865cf0f45cf12, type: 3}
+      propertyPath: m_UsedByComposite
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 6292108022186554764, guid: 9e955c97a884d426086865cf0f45cf12, type: 3}

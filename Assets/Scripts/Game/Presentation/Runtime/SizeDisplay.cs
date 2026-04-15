@@ -1,34 +1,46 @@
+using System;
 using Game.Gameplay;
 using UnityEngine;
 
 namespace Game.Presentation
 {
-    [RequireComponent(typeof(Unit))]
+    [RequireComponent(typeof(Body))]
     public class SizeDisplay : MonoBehaviour
     {
+        private const float BaseScale = 1f;
         private const float ScalePerSize = 0.3f;
+        private const float SmoothSpeed = 8f;
 
-        private Unit _unit;
+        private Body _body;
+        private float _targetScale;
 
         private void Awake()
         {
-            _unit = GetComponent<Unit>();
+            _body = GetComponent<Body>();
         }
 
         private void OnEnable()
         {
-            _unit.Body.Size.Changed += UpdateVisuals;
+            _body.Size.Changed += UpdateVisuals;
+            UpdateVisuals(_body.Size.Current);
+            transform.localScale = Vector3.one * _targetScale;
+        }
+
+        private void Update()
+        {
+            float currentScale = transform.localScale.x;
+            float nextScale = Mathf.Lerp(currentScale, _targetScale, SmoothSpeed * Time.deltaTime);
+            transform.localScale = Vector3.one * nextScale;
         }
 
         private void OnDisable()
         {
-            _unit.Body.Size.Changed -= UpdateVisuals;
+            _body.Size.Changed -= UpdateVisuals;
         }
 
         private void UpdateVisuals(int size)
         {
-            float scale = Mathf.Max(_unit.Body.Size.Min + Mathf.Sqrt(size) * ScalePerSize, _unit.Body.Size.Min);
-            transform.localScale = Vector3.one * scale;
+            _targetScale = BaseScale + size * ScalePerSize;
         }
     }
 }

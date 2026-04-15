@@ -9,7 +9,7 @@ namespace Game.Gameplay
         [SerializeField, Min(1)] private int _minSize;
         [SerializeField, Min(1)] private int _maxSize;
         
-        [SerializeField, Min(0.1f)]private float _delayInDecrease;
+        [SerializeField, Min(0f)]private float _delayInDecrease;
         
         public int MinSize => _minSize;
         public int MaxSize => _maxSize;
@@ -27,7 +27,7 @@ namespace Game.Gameplay
             if (_maxSize < _minSize)
                 throw new ArgumentException($"{nameof(_maxSize)} must be greater than or equal to {nameof(_minSize)}");
             
-            if (_delayInDecrease <= 0f)
+            if (_delayInDecrease < 0f)
                 throw new ArgumentOutOfRangeException(nameof(_delayInDecrease));
         }
     }

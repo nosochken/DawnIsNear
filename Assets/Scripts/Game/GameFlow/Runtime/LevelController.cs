@@ -10,7 +10,8 @@ namespace Game.GameFlow
     {
         private Player _player;
         private List<EnemySpawner> _enemySpawners;
-        private Spawner<Food> _foodSpawner;
+        private FoodSpawner _foodSpawner;
+        private SlimeSpawner _slimeSpawner;
         
         private bool _isRunning;
         
@@ -23,7 +24,7 @@ namespace Game.GameFlow
             _player = player ?? throw new ArgumentNullException(nameof(player));
         }
         
-        internal void Initialize(List<EnemySpawner> enemySpawners, Spawner<Food> foodSpawner)
+        internal void Initialize(List<EnemySpawner> enemySpawners, FoodSpawner foodSpawner, SlimeSpawner slimeSpawner)
         {
             if (enemySpawners == null)
                 throw new ArgumentNullException(nameof(enemySpawners));
@@ -33,9 +34,13 @@ namespace Game.GameFlow
 
             if (foodSpawner == null)
                 throw new ArgumentNullException(nameof(foodSpawner));
+            
+            if (slimeSpawner == null)
+                throw new ArgumentNullException(nameof(slimeSpawner));
 
             _enemySpawners = enemySpawners;
             _foodSpawner = foodSpawner;
+            _slimeSpawner = slimeSpawner;
         }
 
         internal void StartLevel()
@@ -54,6 +59,7 @@ namespace Game.GameFlow
             Subscribe();
             
             _foodSpawner.MaintainTargetCount();
+            _slimeSpawner.MaintainTargetCount();
 
             foreach (EnemySpawner enemySpawner in _enemySpawners)
                 enemySpawner.SpawnTargetCount();

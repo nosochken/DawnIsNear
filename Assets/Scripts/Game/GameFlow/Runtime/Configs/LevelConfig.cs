@@ -11,10 +11,12 @@ namespace Game.GameFlow
         [SerializeField] private PlayerConfig _playerConfig;
         [SerializeField] private EnemySpawnData[] _enemySpawnData;
         [SerializeField] private FoodSpawnData _foodSpawnData;
+        [SerializeField] private SlimeSpawnData _slimeSpawnData;
         
         public PlayerConfig PlayerConfig => _playerConfig;
         public IReadOnlyList<EnemySpawnData> EnemySpawnData => _enemySpawnData;
         public FoodSpawnData FoodSpawnData => _foodSpawnData;
+        public SlimeSpawnData SlimeSpawnData => _slimeSpawnData;
         
         public void Validate()
         {
@@ -30,8 +32,12 @@ namespace Game.GameFlow
             if (_foodSpawnData == null)
                 throw new ArgumentNullException(nameof(_foodSpawnData));
             
+            if (_slimeSpawnData == null)
+                throw new ArgumentNullException(nameof(_slimeSpawnData));
+            
             _playerConfig.Validate();
             _foodSpawnData.Validate();
+            _slimeSpawnData.Validate();
 
             for (int i = 0; i < _enemySpawnData.Length; i++)
             {

@@ -17,6 +17,8 @@ MonoBehaviour:
   - _config: {fileID: 11400000, guid: f4325e9eba05e4f5ca77fd3e148a9aa3, type: 2}
     _count: 6
   _foodSpawnData:
-    _prefab: {fileID: 5820256450415405210, guid: a02eb90e0bd1a46dfaa8262e3dc249e4, type: 3}
+    _config: {fileID: 11400000, guid: a718c97ac68444eca991571c15c1df97, type: 2}
     _count: 50
-  _playerWinSize: 20
+  _slimeSpawnData:
+    _config: {fileID: 11400000, guid: 5ea411aa9286640f6a10a8c4d1902e03, type: 2}
+    _count: 10
